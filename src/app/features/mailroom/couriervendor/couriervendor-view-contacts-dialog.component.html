@@ -1,0 +1,49 @@
+<div class="dialog-header">
+  <div class="dialog-header-row">
+    <div>
+      <h2 class="dialog-title">Contacts — {{ data.vendor.vendorName }}</h2>
+      <p class="dialog-subtitle">Contacts recorded for this courier vendor.</p>
+    </div>
+    <app-button variant="secondary" icon="close" [iconOnly]="true" type="button" (click)="dialogRef.close()">Close</app-button>
+  </div>
+</div>
+
+<div class="dialog-content">
+  @if (loading()) {
+    <p class="empty-hint">Loading contacts…</p>
+  } @else if (error()) {
+    <p class="empty-hint empty-hint--error">Couldn't load contacts for this vendor.</p>
+  } @else if (rows().length === 0) {
+    <app-empty-state icon="inbox" message="No contacts recorded for this vendor." />
+  } @else {
+    <div class="grid-table-scroll">
+      <table class="grid-table">
+        <thead>
+          <tr>
+            <th>Contact Person</th>
+            <th>Contact No</th>
+            <th>Email</th>
+            <th>Desk</th>
+            <th>Active</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows(); track row.courierVendorContactId) {
+            <tr>
+              <td>{{ row.contactPerson || '—' }}</td>
+              <td>{{ row.contactNo || '—' }}</td>
+              <td>{{ row.emailId || '—' }}</td>
+              <td>{{ row.deskName || '—' }}</td>
+              <td>{{ row.isActive ? 'Yes' : 'No' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <p class="row-count">{{ rows().length }} contact(s) recorded</p>
+  }
+</div>
+
+<div class="dialog-footer">
+  <app-button variant="muted" type="button" (click)="dialogRef.close()">Close</app-button>
+</div>

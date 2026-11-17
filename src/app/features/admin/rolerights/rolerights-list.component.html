@@ -1,0 +1,156 @@
+<div class="app-page-card skyline-card">
+  <div class="page-header-row">
+    <div class="page-header-left">
+      <span class="page-icon-badge"><app-icon [name]="headerIcon()" [size]="26" /></span>
+      <div>
+        <h2 class="app-page-title">Role Rights</h2>
+        <p class="app-page-subtitle">Manage view, add, edit and delete permissions per role and menu</p>
+      </div>
+    </div>
+    @if (hasUnsavedChanges()) {
+      <span class="unsaved-badge">{{ changedRows().length }} unsaved change{{ changedRows().length === 1 ? '' : 's' }}</span>
+    }
+  </div>
+
+  @if (menuService.hasLoaded() && !rights().canView) {
+    <app-empty-state class="access-denied-row" icon="lock" message="You don't have permission to view role rights." />
+  } @else {
+    <div class="toolbar-pill-row toolbar-pill-row--compact rolerights-toolbar">
+      <app-select
+        class="role-select"
+        leadingIcon="group"
+        [options]="roleOptions()"
+        [ngModel]="selectedRoleId()"
+        (ngModelChange)="selectRole($event)"
+        [ngModelOptions]="{ standalone: true }"
+      />
+      <app-select class="extra-filter-select" [options]="softwareOptions()" [ngModel]="softwareFilter()" (ngModelChange)="softwareFilter.set($event)" [ngModelOptions]="{ standalone: true }" />
+      <app-select class="extra-filter-select" [options]="mainMenuOptions()" [ngModel]="mainMenuFilter()" (ngModelChange)="mainMenuFilter.set($event)" [ngModelOptions]="{ standalone: true }" />
+      <div class="search-pill">
+        <span class="search-pill-icon-button"><app-icon name="search" [size]="17" /></span>
+        <input type="text" class="search-pill-input" placeholder="Search menus…" [ngModel]="searchText()" (ngModelChange)="searchText.set($event)" aria-label="Search menus" />
+      </div>
+      <app-select class="extra-filter-select" [options]="assignedOptions" [ngModel]="assignedFilter()" (ngModelChange)="assignedFilter.set($event)" [ngModelOptions]="{ standalone: true }" />
+      <app-button variant="muted" icon="refresh" size="sm" [disabled]="!selectedRoleId() || loadingRole()" (click)="reload()">Refresh</app-button>
+      @if (rights().canEdit) {
+        <app-button variant="secondary" icon="check_circle_outline" size="sm" [disabled]="!selectedRoleId() || shownRows().length === 0" (click)="allowShown()">Allow Shown</app-button>
+        <app-button variant="secondary" icon="close" size="sm" [disabled]="!selectedRoleId() || shownRows().length === 0" (click)="clearShown()">Clear Shown</app-button>
+        <app-button variant="navy" icon="save" size="sm" [disabled]="!hasUnsavedChanges() || saving()" [loading]="saving()" (click)="saveChanges()">Save Changes</app-button>
+      }
+    </div>
+
+    @if (loadingCatalog()) {
+      <div class="app-table-scroll">
+        @for (i of [1, 2, 3, 4, 5]; track i) {
+          <div class="app-skeleton-row">
+            <div class="app-skeleton-block" style="width: 110px"></div>
+            <div class="app-skeleton-block" style="width: 110px"></div>
+            <div class="app-skeleton-block" style="width: 130px"></div>
+            <div class="app-skeleton-block" style="width: 150px"></div>
+          </div>
+        }
+      </div>
+    } @else if (!selectedRoleId()) {
+      <app-empty-state icon="group" message="Select a role to view its permissions." />
+    } @else if (loadingRole()) {
+      <div class="app-table-scroll">
+        @for (i of [1, 2, 3, 4, 5]; track i) {
+          <div class="app-skeleton-row">
+            <div class="app-skeleton-block" style="width: 110px"></div>
+            <div class="app-skeleton-block" style="width: 110px"></div>
+            <div class="app-skeleton-block" style="width: 130px"></div>
+            <div class="app-skeleton-block" style="width: 150px"></div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="app-table-scroll">
+        <table class="w-full border-collapse text-sm matrix-table">
+          <thead>
+            <tr class="matrix-head-row">
+              <th class="matrix-th" style="width: 110px">Software</th>
+              <th class="matrix-th" style="width: 120px">Main Menu</th>
+              <th class="matrix-th" style="width: 140px">Vertical Menu</th>
+              <th class="matrix-th" style="width: 110px">Code</th>
+              <th class="matrix-th" style="width: 150px">Name</th>
+              <th class="matrix-th perm-th" style="width: 80px">
+                <app-checkbox [disabled]="!rights().canEdit" [ngModel]="headerState('canView') === 'checked'" [indeterminate]="headerState('canView') === 'indeterminate'" [ngModelOptions]="{ standalone: true }" (ngModelChange)="toggleColumn('canView')">View</app-checkbox>
+              </th>
+              <th class="matrix-th perm-th" style="width: 75px">
+                <app-checkbox [disabled]="!rights().canEdit" [ngModel]="headerState('canAdd') === 'checked'" [indeterminate]="headerState('canAdd') === 'indeterminate'" [ngModelOptions]="{ standalone: true }" (ngModelChange)="toggleColumn('canAdd')">Add</app-checkbox>
+              </th>
+              <th class="matrix-th perm-th" style="width: 75px">
+                <app-checkbox [disabled]="!rights().canEdit" [ngModel]="headerState('canEdit') === 'checked'" [indeterminate]="headerState('canEdit') === 'indeterminate'" [ngModelOptions]="{ standalone: true }" (ngModelChange)="toggleColumn('canEdit')">Edit</app-checkbox>
+              </th>
+              <th class="matrix-th perm-th" style="width: 100px">
+                <app-checkbox [disabled]="!rights().canEdit" [ngModel]="headerState('canDelete') === 'checked'" [indeterminate]="headerState('canDelete') === 'indeterminate'" [ngModelOptions]="{ standalone: true }" (ngModelChange)="toggleColumn('canDelete')">Delete</app-checkbox>
+              </th>
+              <th class="matrix-th" style="width: 100px">Status</th>
+              <th class="matrix-th matrix-actions-th" style="width: 64px">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of shownRows(); track row.subMenuId) {
+              <tr [class.row--changed]="isChanged(row)">
+                <td class="px-3 py-3 text-navy-800 whitespace-nowrap">{{ row.softwareName || '—' }}</td>
+                <td class="px-3 py-3 text-navy-800 whitespace-nowrap">{{ row.mainMenuName || '—' }}</td>
+                <td class="px-3 py-3 text-navy-800 whitespace-nowrap">{{ row.verticalMenuName || '—' }}</td>
+                <td class="px-3 py-3 whitespace-nowrap"><span class="code-pill">{{ row.subMenuCode }}</span></td>
+                <td class="px-3 py-3 text-navy-800 whitespace-nowrap">{{ row.subMenuName }}</td>
+                <td class="perm-td">
+                  <app-checkbox [disabled]="!rights().canEdit || !canTouch(row, 'canView')" [ngModel]="row.canView" [ngModelOptions]="{ standalone: true }" (ngModelChange)="toggleFlag(row, 'canView')" />
+                </td>
+                <td class="perm-td">
+                  <app-checkbox [disabled]="!rights().canEdit || !canTouch(row, 'canAdd')" [ngModel]="row.canAdd" [ngModelOptions]="{ standalone: true }" (ngModelChange)="toggleFlag(row, 'canAdd')" />
+                </td>
+                <td class="perm-td">
+                  <app-checkbox [disabled]="!rights().canEdit || !canTouch(row, 'canEdit')" [ngModel]="row.canEdit" [ngModelOptions]="{ standalone: true }" (ngModelChange)="toggleFlag(row, 'canEdit')" />
+                </td>
+                <td class="perm-td">
+                  <app-checkbox [disabled]="!rights().canEdit || !canTouch(row, 'canDelete')" [ngModel]="row.canDelete" [ngModelOptions]="{ standalone: true }" (ngModelChange)="toggleFlag(row, 'canDelete')" />
+                </td>
+                <td class="px-3 py-3 whitespace-nowrap">
+                  @if (row.roleRightId) {
+                    <span class="status-pill status-pill--assigned">Assigned</span>
+                  } @else {
+                    <span class="status-pill status-pill--unassigned">Not Assigned</span>
+                  }
+                </td>
+                <td class="matrix-actions-td">
+                  @if (isChanged(row)) {
+                    <button type="button" class="row-icon-button" title="Undo changes" (click)="undoRow(row)">
+                      <app-icon name="refresh" [size]="15" />
+                    </button>
+                  }
+                  @if (row.roleRightId) {
+                    <button type="button" class="row-icon-button" title="View History" (click)="openHistory(row)">
+                      <app-icon name="history" [size]="15" />
+                    </button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        @if (shownRows().length === 0) {
+          <app-empty-state icon="inbox" message="No menus match the current filters." />
+        }
+      </div>
+    }
+
+    @if (selectedRoleId() && !loadingRole()) {
+      <div class="footer-row">
+        <div class="footer-status">
+          <app-icon name="info_outline" [size]="20" class="footer-status-icon" />
+          <div>
+            <span class="footer-status-count">{{ assignedCount() }} of {{ matrixRows().length }} menus assigned</span>
+            @if (statusMessage()) {
+              <span class="footer-status-message">{{ statusMessage() }}</span>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  }
+</div>

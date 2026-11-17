@@ -1,0 +1,100 @@
+// CDK gives the overlay pane (the actual white modal box, sized by
+// DialogService's own width/maxWidth config — see master-list.component.ts's
+// own openAdd()/openEdit() calls) `display: flex`. Without an explicit width
+// here, this component's own host is a flex item with no flex-basis, so it
+// shrinks to its content's minimum (bounded by .dialog-content's own
+// min-width below) instead of filling the pane — CONFIRMED via direct
+// measurement: the pane rendered at 720px but this host only at 600px,
+// leaving a 120px dead strip on the right inside the visible modal box (and
+// the footer's own divider/buttons stopping short of the pane's real right
+// edge). `width: 100%` makes it track the pane's actual resolved width
+// exactly, desktop or responsive.
+:host {
+  display: block;
+  width: 100%;
+}
+
+.dialog-header {
+  padding: 24px 24px 0;
+}
+
+.dialog-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--app-space-3);
+}
+
+.dialog-title {
+  margin: 0;
+  font: var(--mat-sys-title-large);
+  color: var(--mat-sys-on-surface);
+}
+
+.dialog-content {
+  padding: 16px 24px 4px;
+}
+
+.form-content {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 24px;
+
+  @media (max-width: 719.98px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.full-width {
+  width: 100%;
+}
+
+// Opts a field (via formFields[].fullRow — see master-entity-config.model.ts's
+// own comment) out of the two-column grid to span the full dialog width —
+// for a field like free-text Remarks that genuinely benefits from more room
+// rather than being squeezed into whatever half-width cell it lands in.
+.form-field--full-row {
+  grid-column: 1 / -1;
+}
+
+// Every boolean field together in one compact, responsive area instead of
+// each taking a full text-field-height row interleaved with unrelated
+// fields — spans the full grid width so it isn't confined to a single
+// half-width cell, and its own columns auto-fill based on available space
+// (2 on a typical dialog width, gracefully down to 1 on the narrow/mobile
+// layout below).
+.form-checkbox-grid {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: var(--app-space-1) var(--app-space-4);
+}
+
+.form-checkbox {
+  margin: 0;
+}
+
+.form-error {
+  margin: 16px 0 0;
+  color: var(--color-error-fg);
+  font-size: 13px;
+}
+
+// Footer — Close/Save, right-aligned. Same 24px side padding as the header/
+// content above so the divider and buttons line up with the modal's real
+// edges, not a narrower inner box (see this file's own :host comment).
+.dialog-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--app-space-3);
+  padding: 16px 24px 24px;
+  border-top: 1px solid var(--color-navy-200);
+  margin-top: 8px;
+}
+
+.dialog-footer-actions {
+  display: flex;
+  gap: var(--app-space-2);
+}

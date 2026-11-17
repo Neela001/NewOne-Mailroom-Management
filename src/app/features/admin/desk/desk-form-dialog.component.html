@@ -1,0 +1,107 @@
+<div class="dialog-header">
+  <div class="dialog-header-row">
+    <div>
+      <h2 class="dialog-title">{{ dialogTitle }}</h2>
+      <p class="dialog-subtitle">Choose MAIN or SUB Desk, then select City, Site and Desk locations.</p>
+    </div>
+    <app-button variant="secondary" icon="close" [iconOnly]="true" type="button" (click)="onCancel()">Close</app-button>
+  </div>
+</div>
+
+<div class="tab-row" role="tablist">
+  <button type="button" role="tab" class="tab-button" [class.tab-button--active]="tab() === 'details'" (click)="setTab('details')">Desk details</button>
+  <button type="button" role="tab" class="tab-button" [class.tab-button--active]="tab() === 'email'" (click)="setTab('email')">Email</button>
+</div>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()" (keydown.enter)="onEnterKey($event)">
+  <div class="dialog-content">
+    @if (tab() === 'details') {
+      <div class="form-content two-col">
+        <app-select label="Desk Type" [required]="true" [options]="deskTypeOptions" formControlName="deskType" [invalid]="!!(form.get('deskType')?.invalid && form.get('deskType')?.touched)" errorText="Desk type is required" />
+
+        @if (deskType() === 'SUB') {
+          <app-combobox label="Parent MAIN Desk" [options]="parentDeskOptions()" [loading]="parentDeskLoading()" [error]="parentDeskError()" formControlName="parentDeskId" placeholder="None" />
+        } @else {
+          <div></div>
+        }
+
+        <app-input label="Desk Code" [required]="true" formControlName="deskCode" [invalid]="!!(form.get('deskCode')?.invalid && form.get('deskCode')?.touched)" errorText="Desk code is required" />
+        <app-input label="Desk Name" [required]="true" formControlName="deskName" [invalid]="!!(form.get('deskName')?.invalid && form.get('deskName')?.touched)" errorText="Desk name is required" />
+
+        <app-combobox label="City" [required]="true" [options]="cityOptions()" [loading]="cityLoading()" [error]="cityError()" formControlName="cityId" [invalid]="!!(form.get('cityId')?.invalid && form.get('cityId')?.touched)" errorText="City is required" />
+        <app-combobox label="Site" [required]="true" [options]="siteOptions()" [loading]="siteLoading()" [error]="siteError()" formControlName="siteId" [invalid]="!!(form.get('siteId')?.invalid && form.get('siteId')?.touched)" errorText="Site is required" />
+
+        <div class="form-field--full-row location-section">
+          <div class="location-section-header">
+            <h3 class="location-section-title">Desk Location Selection</h3>
+            <p class="location-section-subtitle">Select Building / Floor / Wing combinations for this Desk.</p>
+          </div>
+          <span class="location-count-pill">{{ selectedLocationCount() }} location{{ selectedLocationCount() === 1 ? '' : 's' }} selected</span>
+
+          @if (!form.get('siteId')?.value) {
+            <p class="location-hint">Select a City and Site to load the available locations.</p>
+          } @else if (locationsLoading()) {
+            <div class="location-loading">
+              <span class="h-6 w-6 animate-spin rounded-full border-2 border-navy-200 border-t-brand-600"></span>
+              <span>Loading locations…</span>
+            </div>
+          } @else if (locationsError()) {
+            <p class="location-hint location-hint--error">Couldn't load locations for this site.</p>
+          } @else if (locationOptions().length === 0) {
+            <p class="location-hint">No Building / Floor / Wing combinations are configured for this site.</p>
+          } @else {
+            <div class="location-table-scroll">
+              <table class="w-full border-collapse text-sm">
+                <thead>
+                  <tr class="border-b border-navy-200">
+                    <th class="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-navy-500 whitespace-nowrap">Select</th>
+                    <th class="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-navy-500 whitespace-nowrap">Building</th>
+                    <th class="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-navy-500 whitespace-nowrap">Floor</th>
+                    <th class="px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-navy-500 whitespace-nowrap">Wing</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (opt of locationOptions(); track opt.buildingId + '|' + opt.floorId + '|' + opt.wingId) {
+                    <tr class="border-b border-navy-100 last:border-0" [class.location-row--disabled]="!opt.isAvailable">
+                      <td class="px-3 py-2">
+                        <app-checkbox [disabled]="!opt.isAvailable" [ngModel]="isLocationSelected(opt)" [ngModelOptions]="{ standalone: true }" (ngModelChange)="toggleLocation(opt)" />
+                      </td>
+                      <td class="px-3 py-2 text-navy-800 whitespace-nowrap">{{ opt.buildingName }}</td>
+                      <td class="px-3 py-2 text-navy-800 whitespace-nowrap">{{ opt.floorName }}</td>
+                      <td class="px-3 py-2 text-navy-800 whitespace-nowrap">{{ opt.wingName }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    @if (tab() === 'email') {
+      <div class="form-content two-col">
+        <div class="form-field--full-row email-select-row">
+          <app-combobox label="Email (optional)" [options]="emailOptions()" [loading]="emailLoading()" [error]="emailError()" formControlName="emailId" placeholder="None" noResultsText="No active email settings found." />
+          <div class="email-select-actions">
+            <app-button variant="muted" icon="refresh" size="sm" type="button" [loading]="emailLoading()" [disabled]="emailLoading()" (click)="loadEmailOptions()">Refresh emails</app-button>
+            <app-button variant="secondary" icon="tune" size="sm" type="button" (click)="openEmailSettings()">Email settings</app-button>
+          </div>
+        </div>
+        <p class="form-field--full-row email-select-hint">Choose an address from Email Settings, or leave blank.</p>
+
+        <app-rich-text-editor class="form-field--full-row" label="Email signature (optional)" formControlName="emailSignature" />
+        <app-textarea class="form-field--full-row" label="Remarks (optional)" formControlName="remarks" />
+      </div>
+    }
+
+    @if (errorMessage()) {
+      <p class="form-error">{{ errorMessage() }}</p>
+    }
+  </div>
+
+  <div class="dialog-footer">
+    <app-button variant="secondary" icon="cancel" type="button" (click)="onCancel()" [disabled]="saving()">Cancel</app-button>
+    <app-button variant="navy" icon="save" type="submit" [loading]="saving()" [disabled]="saving()">Save Desk</app-button>
+  </div>
+</form>

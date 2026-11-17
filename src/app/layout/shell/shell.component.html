@@ -1,0 +1,32 @@
+<!-- The permanent primary nav on desktop (always visible, in-flow) — below
+     the tablet breakpoint it becomes a hamburger-triggered overlay drawer
+     instead, toggled by app-topbar's own hamburger button — never both
+     forms shown at once. [class.shell-sidenav--compact] and app-sidenav's
+     own [compact] input both read the SAME `sidebarCompact` signal (see
+     shell.component.ts's own comment for why this is owned here, not
+     mirrored from a second signal the child used to keep independently),
+     so the container's width and its content's icon-only/labeled rendering
+     can never disagree. Plain flex layout + our own backdrop, not Angular
+     Material's mat-sidenav-container — see shell.component.scss's own
+     comment. -->
+<div class="shell-container">
+  @if (isCompact() && mobileOpen()) {
+    <div class="shell-backdrop" (click)="mobileOpen.set(false)"></div>
+  }
+
+  <aside
+    class="shell-sidenav"
+    [class.shell-sidenav--compact]="sidebarCompact()"
+    [class.shell-sidenav--overlay]="isCompact()"
+    [class.shell-sidenav--open]="!isCompact() || mobileOpen()"
+  >
+    <app-sidenav [compact]="sidebarCompact()" (linkClicked)="onLinkClicked()" (toggleCompact)="toggleSidebarCompact()"></app-sidenav>
+  </aside>
+
+  <div class="shell-content">
+    <app-topbar (menuToggle)="onMenuToggle()"></app-topbar>
+    <main class="shell-main">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

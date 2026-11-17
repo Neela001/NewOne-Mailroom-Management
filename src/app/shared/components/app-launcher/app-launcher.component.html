@@ -1,0 +1,61 @@
+<button
+  type="button"
+  #trigger
+  class="launcher-trigger"
+  [class.launcher-trigger--active]="isOpen()"
+  title="Applications"
+  aria-label="Applications"
+  [attr.aria-expanded]="isOpen()"
+  (click)="toggle(trigger)"
+>
+  <app-icon name="apps" [size]="19" />
+</button>
+
+@if (mounted()) {
+  <div
+    class="launcher-panel"
+    [class.launcher-panel--open]="isOpen()"
+    [style.top.px]="pos().top"
+    [style.left.px]="pos().left"
+    role="dialog"
+    aria-label="Applications"
+  >
+    <div class="launcher-panel-header">
+      <div class="launcher-panel-header-text">
+        <h3>Your Applications</h3>
+        @if (loaded() && activeApplications().length > 0) {
+          <span class="launcher-count-badge">{{ activeApplications().length }}</span>
+        }
+      </div>
+      <button type="button" class="launcher-close-btn" aria-label="Close" (click)="close()">
+        <app-icon name="close" [size]="15" />
+      </button>
+    </div>
+
+    <div class="launcher-grid-scroll">
+      @if (!loaded()) {
+        <div class="launcher-grid">
+          @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+            <div class="launcher-skeleton-tile">
+              <div class="launcher-skeleton-icon"></div>
+              <div class="launcher-skeleton-label"></div>
+            </div>
+          }
+        </div>
+      } @else if (activeApplications().length === 0) {
+        <p class="launcher-empty">No applications available.</p>
+      } @else {
+        <div class="launcher-grid">
+          @for (app of activeApplications(); track app.id) {
+            <button type="button" class="launcher-tile" (click)="openApplication(app)">
+              <span class="launcher-tile-icon" [class]="accentClass(app.id)">
+                <app-icon [name]="app.icon" [size]="21" />
+              </span>
+              <span class="launcher-tile-label">{{ app.name }}</span>
+            </button>
+          }
+        </div>
+      }
+    </div>
+  </div>
+}

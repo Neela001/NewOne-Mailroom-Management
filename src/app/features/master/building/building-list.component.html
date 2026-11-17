@@ -1,0 +1,108 @@
+<div class="app-page-card skyline-card">
+  <div class="page-header-row">
+    <div class="page-header-left">
+      <span class="page-icon-badge"><app-icon [name]="headerIcon()" [size]="26" /></span>
+      <div>
+        <h2 class="app-page-title">Building Master</h2>
+        <p class="app-page-subtitle">Manage buildings and their linked site</p>
+      </div>
+    </div>
+  </div>
+
+  @if (menuService.hasLoaded() && !rights().canView) {
+    <app-empty-state class="access-denied-row" icon="lock" message="You don't have permission to view buildings." />
+  } @else {
+    <div class="toolbar-pill-row toolbar-pill-row--compact">
+      <div class="search-pill">
+        <button type="button" class="search-pill-icon-button" (click)="search()" aria-label="Search">
+          <app-icon name="search" [size]="17" />
+        </button>
+        <input type="text" class="search-pill-input" placeholder="Search buildings…" [ngModel]="searchDisplay()" (ngModelChange)="searchDisplay.set($event)" (keydown.enter)="search()" aria-label="Search" />
+      </div>
+      <span class="toolbar-divider" aria-hidden="true"></span>
+      <app-select class="active-filter-select" leadingIcon="filter_list_alt" [options]="activeFilterOptions" [ngModel]="activeFilter()" (ngModelChange)="activeFilter.set($event)" [ngModelOptions]="{ standalone: true }" />
+      <app-button variant="primary" icon="search" size="sm" [disabled]="loading()" (click)="search()">Find</app-button>
+      <app-button variant="muted" icon="refresh" size="sm" [disabled]="loading()" (click)="refresh()">Refresh</app-button>
+      @if (rights().canAdd) {
+        <app-button variant="primary" icon="add" size="sm" (click)="openAdd()">Add</app-button>
+      }
+      @if (rights().canEdit || rights().canDelete || rights().canView) {
+        <span class="toolbar-divider" aria-hidden="true"></span>
+        <div class="toolbar-row-actions">
+          @if (rights().canEdit) {
+            <app-button variant="success" icon="edit" size="sm" [disabled]="!selectedRow()" (click)="openEdit()">Edit</app-button>
+          }
+          @if (rights().canDelete) {
+            <app-button variant="danger" icon="delete" size="sm" [disabled]="!selectedRow()" (click)="deleteRow()">Delete</app-button>
+          }
+          @if (rights().canView) {
+            <app-button variant="info" icon="history" size="sm" [disabled]="!selectedRow()" (click)="openViewHistory()">View / History</app-button>
+          }
+        </div>
+      }
+    </div>
+
+    @if (loading()) {
+      <div class="app-table-scroll">
+        @for (i of skeletonRows; track i) {
+          <div class="app-skeleton-row">
+            @for (c of [1, 2, 3, 4, 5, 6]; track c) {
+              <div class="app-skeleton-block" style="width: 90px"></div>
+            }
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="app-table-scroll">
+        <table class="w-full border-collapse text-sm building-table">
+          <thead>
+            <tr class="table-head-row">
+              <th class="building-th" style="width: 110px">Site Code</th>
+              <th class="building-th" style="width: 170px">Site Name</th>
+              <th class="building-th" style="width: 120px">Building Code</th>
+              <th class="building-th" style="width: 170px">Building Name</th>
+              <th class="building-th" style="width: 130px">Building Type</th>
+              <th class="building-th center-th" style="width: 70px">Active</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of pagedRows(); track row.buildingId) {
+              <tr class="cursor-pointer" [class.row--selected]="isSelected(row)" (click)="selectRow(row)">
+                <td class="px-3 py-3.5 whitespace-nowrap"><span class="code-pill">{{ row.siteCode || '—' }}</span></td>
+                <td class="px-3 py-3.5 text-navy-800 whitespace-nowrap">{{ row.siteName || '—' }}</td>
+                <td class="px-3 py-3.5 whitespace-nowrap"><span class="code-pill">{{ row.buildingCode || '—' }}</span></td>
+                <td class="px-3 py-3.5 text-navy-800 whitespace-nowrap">{{ row.buildingName || '—' }}</td>
+                <td class="px-3 py-3.5 text-navy-800 whitespace-nowrap">{{ row.buildingType || '—' }}</td>
+                <td class="px-3 py-3.5 whitespace-nowrap center-td">
+                  @if (row.isActive) {
+                    <span class="check-circle"><app-icon name="check" [size]="12" /></span>
+                  } @else {
+                    <span class="text-navy-300">—</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        @if (rows().length === 0) {
+          <app-empty-state icon="inbox" message="No buildings found." />
+        } @else {
+          <app-pagination [total]="rows().length" [pageSize]="pageSize" [page]="page()" (pageChange)="onPageChange($event)" />
+        }
+      </div>
+    }
+
+    <div class="footer-row">
+      <div class="footer-status">
+        <app-icon name="info_outline" [size]="20" class="footer-status-icon" />
+        <div>
+          <span class="footer-status-count">{{ rows().length }} buildings</span>
+          @if (statusMessage()) {
+            <span class="footer-status-message">{{ statusMessage() }}</span>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

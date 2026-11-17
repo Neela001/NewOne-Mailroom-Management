@@ -1,0 +1,84 @@
+/* Tailwind CSS v4 entry point — kept as its own plain .css file, separate
+   from src/styles.scss, specifically because Tailwind v4's own
+   `@import "tailwindcss"` must be resolved by PostCSS, not by Sass's own
+   `@import` (Sass would otherwise try to resolve "tailwindcss" as a .scss
+   partial and fail to find one). Angular's build pipeline routes a plain
+   .css file straight to PostCSS, so this file carries Tailwind and
+   styles.scss keeps compiling through Sass exactly as before — see
+   angular.json's own `styles` array for how both get loaded.
+   styles.scss remains the existing Material theme + the design-system v2
+   utility classes already in place (.app-page-card, .app-skeleton-*,
+   .app-status-chip, etc.) — this file does not replace it; newly-built or
+   redesigned markup uses these Tailwind utilities going forward, per the
+   "Tailwind as the primary styling system for the redesigned interface"
+   brief, while existing working screens keep their current classes until
+   individually redesigned. */
+@import 'tailwindcss';
+
+@theme {
+  /* ==========================================================================
+     "Skyline" — a cool, airy blue-on-white SaaS identity matching an exact
+     reference the user provided (Country Master screen: pale-blue page
+     wash, white cards, a vivid azure accent, pill-shaped toolbar/action
+     controls, bold sans headings). Replaces the earlier "Ink & Paper" pass
+     (warm paper neutrals + editorial serif) — that direction is retired;
+     this is the authoritative one. Same token NAMES as always (brand-*,
+     navy-*, success/warning/error-bg/fg) so every existing
+     `bg-brand-600`/`text-navy-700`/etc. utility class across the app
+     re-skins automatically from this one file. ========================================================================== */
+  --font-sans:
+    'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  /* Kept defined (unused by default now) in case a future screen wants a
+     display face — titles/headings now use --font-sans at a bold weight,
+     matching the reference's own bold sans treatment, not a serif. */
+  --font-serif: 'Fraunces', Georgia, 'Times New Roman', serif;
+
+  /* Accent — a clean, vivid azure blue. */
+  --color-brand-50: #eef3ff;
+  --color-brand-100: #dde9ff;
+  --color-brand-200: #bad2ff;
+  --color-brand-300: #8bb0ff;
+  --color-brand-400: #5a87fa;
+  --color-brand-500: #3f6bf0;
+  --color-brand-600: #2f5be5;
+  --color-brand-700: #2347c2;
+  --color-brand-800: #1d3a9e;
+  --color-brand-900: #182f7d;
+
+  /* Cool slate-blue neutral scale — page backgrounds lean pale blue-white,
+     text leans dark navy, never warm. */
+  --color-navy-50: #f6f8fd;
+  --color-navy-100: #eef2fa;
+  --color-navy-200: #e1e7f5;
+  --color-navy-300: #c8d2e8;
+  --color-navy-400: #99a6c6;
+  --color-navy-500: #6a7798;
+  --color-navy-600: #4b5674;
+  --color-navy-700: #37415a;
+  --color-navy-800: #242b40;
+  --color-navy-900: #141a2b;
+
+  /* Dark chrome surface (sidebar) — deep navy blue. */
+  --color-primary-navy: #121a33;
+
+  /* Semantic states — a status chip's meaning must read instantly
+     regardless of the brand hue. Info reuses the brand accent. */
+  --color-success-bg: #e8f8ee;
+  --color-success-fg: #16a34a;
+  --color-warning-bg: #fef6e7;
+  --color-warning-fg: #b45309;
+  --color-error-bg: #fdecec;
+  --color-error-fg: #dc2626;
+  --color-info-bg: #eef3ff;
+  --color-info-fg: #2f5be5;
+
+  /* Generous radii — cards/dialogs rounded, toolbar/footer controls go
+     further to full pills directly in markup (rounded-full) matching the
+     reference exactly, not expressed as a scale step here. */
+  --radius-card: 20px;
+  --radius-control: 10px;
+  --shadow-card:
+    0 1px 2px rgba(20, 26, 43, 0.05), 0 1px 1px rgba(20, 26, 43, 0.04);
+  --shadow-elevated:
+    0 12px 32px -8px rgba(20, 26, 43, 0.14), 0 2px 8px rgba(20, 26, 43, 0.06);
+}

@@ -1,0 +1,164 @@
+<div class="app-page-card voter-import-card">
+  <div class="dialog-header-row">
+    <div>
+      <h2 class="dialog-title">Import voters from Excel, image or PDF</h2>
+      <p class="dialog-subtitle">Valid checked rows save in one request. Correct remaining rows in the grid and save again.</p>
+    </div>
+    <app-button variant="secondary" icon="close" [iconOnly]="true" type="button" (click)="onClose()">Close</app-button>
+  </div>
+
+  <div class="import-toolbar">
+    <app-input class="import-toolbar-field" label="Ward *" [ngModel]="topWardNo()" (ngModelChange)="topWardNo.set($event)" [ngModelOptions]="{ standalone: true }" />
+    <app-input class="import-toolbar-field" label="Booth *" [ngModel]="topBoothNo()" (ngModelChange)="topBoothNo.set($event)" [ngModelOptions]="{ standalone: true }" />
+
+    <div class="import-toolbar-actions">
+      <input #excelFileInput type="file" accept=".xlsx,.xls,.csv" class="sr-only" (change)="onExcelFileChange($event)" />
+      <app-button variant="primary" icon="file_spreadsheet" size="sm" type="button" (click)="triggerExcelPicker()">Import Excel</app-button>
+
+      <input #imageFileInput type="file" accept="image/jpeg,image/png,image/webp,application/pdf" class="sr-only" (change)="onImageFileChange($event)" />
+      <app-button variant="secondary" icon="browse_image" size="sm" type="button" (click)="triggerImagePicker()">Browse image / PDF</app-button>
+
+      <app-button variant="muted" icon="scan" size="sm" type="button" [disabled]="true" title="Not available — the backend has no OCR/extraction endpoint for this import.">Extract data</app-button>
+      <app-button variant="navy" icon="refresh" size="sm" type="button" (click)="applyWardBooth()">Apply ward / booth</app-button>
+      <app-button variant="muted" icon="tune" size="sm" type="button" [disabled]="true" title="Not available — no OCR configuration exists on the backend.">OCR settings</app-button>
+      <app-button variant="muted" icon="visibility" size="sm" type="button" [disabled]="true" title="Not available — no extracted text exists (no OCR endpoint on the backend).">Show text</app-button>
+    </div>
+  </div>
+
+  @if (parseError()) {
+    <p class="import-error"><app-icon name="error_outline" [size]="15" /> {{ parseError() }}</p>
+  }
+
+  <div class="import-main-content">
+    <div class="import-preview-pane">
+      @if (selectedImageUrl()) {
+        @if (selectedImageIsPdf()) {
+          <iframe [src]="selectedPdfUrl()" class="import-preview-frame" title="Selected PDF preview"></iframe>
+        } @else {
+          <img [src]="selectedImageUrl()" class="import-preview-image" alt="Selected document preview" />
+        }
+        <p class="import-preview-filename">{{ selectedImageName() }}</p>
+      } @else {
+        <div class="import-preview-empty">
+          <app-icon name="browse_image" [size]="32" />
+          <p>No image or PDF selected.</p>
+          <p class="import-preview-hint">Use "Browse image / PDF" to preview a document here. Data extraction from images/PDFs isn't available — see the note above.</p>
+        </div>
+      }
+    </div>
+
+    <div class="import-grid-pane">
+      <div class="import-grid-toolbar">
+        <app-select class="import-result-filter" [options]="resultFilterOptions" [ngModel]="resultFilter()" (ngModelChange)="resultFilter.set($event)" [ngModelOptions]="{ standalone: true }" />
+        <app-button variant="muted" icon="refresh" size="sm" type="button" (click)="refreshView()">Refresh view</app-button>
+        <span class="import-row-count">{{ filteredRows().length }} / {{ rows().length }} rows</span>
+      </div>
+
+      <div class="app-table-scroll import-grid-scroll">
+        @if (rows().length === 0) {
+          <div class="import-grid-empty">
+            <app-icon name="inbox" [size]="28" />
+            <p>No rows imported yet. Use "Import Excel" to load a spreadsheet.</p>
+          </div>
+        } @else {
+          <table class="import-table">
+            <thead>
+              <tr>
+                <th class="import-th import-th--save">Save</th>
+                <th class="import-th" style="width: 70px">S.No *</th>
+                <th class="import-th" style="width: 110px">Voter ID *</th>
+                <th class="import-th" style="width: 160px">Name *</th>
+                <th class="import-th" style="width: 100px">Relation</th>
+                <th class="import-th" style="width: 160px">Relative name</th>
+                <th class="import-th" style="width: 100px">House no.</th>
+                <th class="import-th" style="width: 60px">Age</th>
+                <th class="import-th" style="width: 70px">Ward</th>
+                <th class="import-th" style="width: 70px">Booth</th>
+                <th class="import-th" style="width: 90px">Gender</th>
+                <th class="import-th" style="width: 90px">Status</th>
+                <th class="import-th" style="width: 40px"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of filteredRows(); track row.clientRowId) {
+                <tr [class.import-row--invalid]="row.status === 'invalid'" [class.import-row--saved]="row.status === 'saved'">
+                  <td class="import-td import-td--save">
+                    <app-checkbox [ngModel]="row.checked" [ngModelOptions]="{ standalone: true }" [disabled]="row.status === 'saved'" (ngModelChange)="toggleRowChecked(row.clientRowId)" />
+                  </td>
+                  <td class="import-td">
+                    <input class="import-cell-input" [value]="row.serialNumber" [disabled]="row.status === 'saved'" (input)="updateCell(row.clientRowId, 'serialNumber', $any($event.target).value)" />
+                  </td>
+                  <td class="import-td">
+                    <input class="import-cell-input" [value]="row.voterId" [disabled]="row.status === 'saved'" (input)="updateCell(row.clientRowId, 'voterId', $any($event.target).value)" />
+                  </td>
+                  <td class="import-td">
+                    <input class="import-cell-input" [value]="row.name" [disabled]="row.status === 'saved'" (input)="updateCell(row.clientRowId, 'name', $any($event.target).value)" />
+                  </td>
+                  <td class="import-td">
+                    <input class="import-cell-input" [value]="row.relationType" [disabled]="row.status === 'saved'" (input)="updateCell(row.clientRowId, 'relationType', $any($event.target).value)" />
+                  </td>
+                  <td class="import-td">
+                    <input class="import-cell-input" [value]="row.relativeName" [disabled]="row.status === 'saved'" (input)="updateCell(row.clientRowId, 'relativeName', $any($event.target).value)" />
+                  </td>
+                  <td class="import-td">
+                    <input class="import-cell-input" [value]="row.houseNumber" [disabled]="row.status === 'saved'" (input)="updateCell(row.clientRowId, 'houseNumber', $any($event.target).value)" />
+                  </td>
+                  <td class="import-td">
+                    <input class="import-cell-input" [value]="row.age" [disabled]="row.status === 'saved'" (input)="updateCell(row.clientRowId, 'age', $any($event.target).value)" />
+                  </td>
+                  <td class="import-td">
+                    <input class="import-cell-input" [value]="row.wardNo" [disabled]="row.status === 'saved'" (input)="updateCell(row.clientRowId, 'wardNo', $any($event.target).value)" />
+                  </td>
+                  <td class="import-td">
+                    <input class="import-cell-input" [value]="row.boothNo" [disabled]="row.status === 'saved'" (input)="updateCell(row.clientRowId, 'boothNo', $any($event.target).value)" />
+                  </td>
+                  <td class="import-td">
+                    <input class="import-cell-input" [value]="row.gender" [disabled]="row.status === 'saved'" (input)="updateCell(row.clientRowId, 'gender', $any($event.target).value)" />
+                  </td>
+                  <td class="import-td">
+                    <span class="import-status-pill" [class.import-status-pill--valid]="row.status === 'valid'" [class.import-status-pill--invalid]="row.status === 'invalid'" [class.import-status-pill--saved]="row.status === 'saved'" [title]="row.errors.join(' ') || row.saveMessage || ''">
+                      {{ row.status }}
+                    </span>
+                  </td>
+                  <td class="import-td import-td--remove">
+                    @if (row.status !== 'saved') {
+                      <button type="button" class="import-remove-btn" title="Remove this row" (click)="removeRow(row.clientRowId)">
+                        <app-icon name="delete" [size]="14" />
+                      </button>
+                    }
+                  </td>
+                </tr>
+                @if (row.errors.length > 0) {
+                  <tr class="import-error-row">
+                    <td></td>
+                    <td colspan="12" class="import-row-errors">{{ row.errors.join(' ') }}</td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="import-footer">
+    <div class="import-footer-status">
+      @if (saving()) {
+        <div class="import-progress-bar"><span class="import-progress-bar-fill"></span></div>
+        <span class="import-footer-message">{{ saveProgressMessage() }}</span>
+      } @else if (lastSaveSummary()) {
+        <span class="import-footer-message">{{ lastSaveSummary() }}</span>
+      } @else {
+        <span class="import-footer-message">{{ checkedCount() }} row(s) selected, {{ validCheckedCount() }} valid and ready to save.</span>
+      }
+    </div>
+    <div class="import-footer-actions">
+      @if (saving()) {
+        <app-button variant="danger" icon="close" type="button" (click)="stopImport()">Stop</app-button>
+      }
+      <app-button variant="secondary" icon="cancel" type="button" [disabled]="saving()" (click)="onClose()">Close</app-button>
+      <app-button variant="navy" icon="save" type="button" [loading]="saving()" [disabled]="saving() || validCheckedCount() === 0" (click)="saveData()">Save data</app-button>
+    </div>
+  </div>
+</div>

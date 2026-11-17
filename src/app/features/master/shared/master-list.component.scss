@@ -1,0 +1,204 @@
+// "Skyline" Master list screen — the shared page-header/toolbar-pill/
+// footer chrome used by every list screen lives in styles.scss's own
+// `.skyline-card` / `.page-header-*` / `.toolbar-pill-row` / `.search-
+// pill-*` / `.footer-*` / `.code-pill` classes (see its own comment) so
+// it's defined once; everything below is specific to this screen's own
+// richer table (sortable headers, boolean check-circle / Active toggle-
+// switch cells, per-row "⋮" actions menu) that not every list screen uses
+// yet.
+
+// The Edit/Delete/View History group living inside the toolbar pill
+// itself — see styles.scss's own .toolbar-row-actions comment (hoisted
+// there now that Desk/User Master reuse the identical rule too).
+
+// .toolbar-pill-row--compact's own .search-pill/.active-filter-select
+// width overrides live in styles.scss, right beside their own base rules —
+// see that file's own comment for why (a component-scoped rule of equal
+// specificity racing a global one by bundle order is exactly the
+// ambiguity that bit .extra-filter-select's own width here earlier).
+
+table tbody tr {
+  &:hover {
+    background: var(--color-navy-50);
+  }
+}
+
+// Only set when at least one column declares MasterColumn.width (see
+// master-list.component.ts's own hasColumnWidths comment) — makes those
+// widths deterministic instead of just an auto-layout hint a long value in
+// another cell could still override.
+.table-fixed-cols {
+  table-layout: fixed;
+}
+
+.table-head-row {
+  border-bottom: 1px solid var(--color-navy-200);
+}
+
+.sortable-th {
+  padding: 12px 12px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-navy-500);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+
+  &:hover .sort-icon {
+    color: var(--color-navy-600);
+  }
+}
+
+.th-label {
+  margin-right: 4px;
+}
+
+.sort-icon {
+  color: var(--color-navy-300);
+  vertical-align: -2px;
+
+  &--active {
+    color: var(--color-brand-600);
+  }
+}
+
+.actions-th {
+  padding: 12px;
+  text-align: right;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-navy-500);
+  white-space: nowrap;
+}
+
+.actions-td {
+  padding: 8px 12px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.row-menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: var(--color-navy-100);
+  color: var(--color-navy-600);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--color-brand-100);
+    color: var(--color-brand-700);
+  }
+}
+
+.row-menu-item {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 16px;
+  font-size: 13px;
+  color: var(--color-navy-700);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+
+  &:hover {
+    background: var(--color-navy-50);
+  }
+
+  &--danger {
+    color: var(--color-error-fg);
+
+    &:hover {
+      background: var(--color-error-bg);
+    }
+  }
+}
+
+// A dependent-field boolean column (e.g. Country's own Has State/City/
+// Postal Code/Area) — a filled green check circle, not a checkbox square.
+.check-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-success-fg);
+  color: #ffffff;
+}
+
+// The trailing Active column — a read-only toggle-switch LOOK (not an
+// editable control; Active/Inactive status changes through the Edit
+// dialog, same as before — see master-list.component.ts's own comment),
+// visually distinct from the green check-circle boolean columns above.
+.toggle-display {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 34px;
+  height: 19px;
+  border-radius: 999px;
+  background: var(--color-navy-300);
+  transition: background-color 150ms ease;
+
+  &--on {
+    background: var(--color-brand-600);
+  }
+}
+
+.toggle-display-dot {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(20, 26, 43, 0.25);
+  transition: transform 150ms ease;
+
+  .toggle-display--on & {
+    transform: translateX(15px);
+  }
+}
+
+// A column opted into MasterColumn.truncate (e.g. Sub Menu's own Menu
+// URL) — single line, ellipsis instead of growing the column/table to fit
+// the longest value; the full value is still available via the span's own
+// native title tooltip (see master-list.component.html's own comment).
+.cell-truncate {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cell-checkbox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  border: 1px solid var(--color-navy-300);
+  background: #ffffff;
+
+  &--checked {
+    background: var(--color-brand-600);
+    border-color: var(--color-brand-600);
+    color: #ffffff;
+  }
+}

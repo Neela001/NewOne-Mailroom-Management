@@ -1,0 +1,74 @@
+<div class="dialog-header">
+  <div class="dialog-header-row">
+    <div>
+      <h2 class="dialog-title">New Excel Upload</h2>
+      <p class="dialog-subtitle">* Required.</p>
+    </div>
+    <app-button variant="secondary" icon="close" [iconOnly]="true" type="button" (click)="onCancelClick()">Close</app-button>
+  </div>
+</div>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <div class="dialog-content">
+    <div class="form-content">
+      <div class="upload-name-row">
+        <app-combobox
+          class="upload-name-combobox"
+          label="Upload name"
+          [required]="true"
+          [options]="definitionOptions()"
+          [loading]="definitionsLoading()"
+          [error]="definitionsError()"
+          formControlName="definitionId"
+          placeholder="Select an upload…"
+          noResultsText="No active upload definitions found."
+          [invalid]="!!(form.get('definitionId')?.invalid && form.get('definitionId')?.touched)"
+          errorText="Upload name is required"
+        />
+        <app-button variant="muted" icon="download" type="button" [disabled]="!selectedDefinition()" [loading]="templateLoading()" (click)="getTemplate()">Get template</app-button>
+      </div>
+
+      @if (selectedDefinition()?.contextParameterName) {
+        <app-select label="Context" [options]="contextOptions()" formControlName="contextId" placeholder="(None)" />
+      }
+
+      <div class="file-field">
+        <label class="file-field-label">Excel file (.xlsx, up to 10 MB) <span class="text-error-fg">*</span></label>
+        <input #fileInput type="file" accept=".xlsx" class="sr-only" (change)="onFileChange($event)" />
+        <div class="file-field-row">
+          <app-button variant="muted" icon="file_spreadsheet" type="button" (click)="browseFile()">Browse Excel</app-button>
+          @if (selectedFile()) {
+            <span class="file-field-name">{{ selectedFile()!.name }}</span>
+            <button type="button" class="file-field-clear" (click)="clearFile()" aria-label="Clear selected file">
+              <app-icon name="close" [size]="14" />
+            </button>
+          } @else {
+            <span class="file-field-placeholder">No file selected</span>
+          }
+        </div>
+        @if (fileError()) {
+          <p class="form-error">{{ fileError() }}</p>
+        }
+      </div>
+
+      <p class="form-help-text">Choose an upload, download its template if needed, then browse an Excel file.</p>
+    </div>
+
+    @if (submitting() && submitProgress() !== null) {
+      <div class="submit-progress">
+        <div class="submit-progress-bar" [style.width.%]="submitProgress()"></div>
+      </div>
+      <p class="submit-progress-label">Uploading… {{ submitProgress() }}%</p>
+    }
+
+    @if (errorMessage()) {
+      <p class="form-error">{{ errorMessage() }}</p>
+    }
+  </div>
+
+  <div class="dialog-footer">
+    <app-button variant="muted" icon="refresh" type="button" [loading]="definitionsLoading()" (click)="onReload()">Reload</app-button>
+    <app-button variant="secondary" icon="cancel" type="button" (click)="onCancelClick()" [disabled]="submitting()">Cancel</app-button>
+    <app-button variant="navy" icon="save" type="submit" [loading]="submitting()" [disabled]="submitting()">Submit</app-button>
+  </div>
+</form>

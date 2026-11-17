@@ -1,0 +1,69 @@
+// Plain flex layout replacing Angular Material's own mat-sidenav-container —
+// see shell.component.html's own comment. On desktop the sidebar sits
+// in-flow at a fixed width; below the tablet breakpoint (shell-sidenav--
+// overlay) it becomes a fixed-position drawer sliding in from the left over
+// a dedicated backdrop, shown/hidden via shell-sidenav--open.
+.shell-container {
+  display: flex;
+  height: 100vh;
+  background: var(--mat-sys-surface-container-lowest);
+  overflow: hidden;
+}
+
+.shell-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(28, 26, 23, 0.45);
+  z-index: 1199;
+}
+
+.shell-sidenav {
+  flex: 0 0 auto;
+  width: var(--app-sidenav-width);
+  // A real elevated panel, not a flat-bordered column — distinguishes the
+  // permanent navy sidebar from the light content beside it as its own
+  // surface, sitting slightly above it.
+  box-shadow: 4px 0 24px -8px rgba(15, 42, 82, 0.35);
+  transition:
+    width 180ms ease,
+    transform 180ms ease;
+  overflow-y: auto;
+
+  &--compact {
+    width: var(--app-sidenav-compact-width, 68px);
+  }
+
+  &--overlay {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 1200;
+    transform: translateX(-100%);
+
+    &.shell-sidenav--open {
+      transform: translateX(0);
+    }
+  }
+}
+
+.shell-content {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+.shell-main {
+  padding: var(--app-space-6);
+  box-sizing: border-box;
+  min-height: calc(100vh - var(--app-topbar-height));
+
+  // Cap content width and center it rather than letting a 4-5 column table
+  // stretch edge-to-edge on an ultra-wide monitor — the empty-space problem
+  // called out in the redesign brief gets worse, not better, past ~1600px.
+  // Below that, this is a no-op (the viewport itself is narrower).
+  max-width: 1600px;
+  margin: 0 auto;
+
+  @media (max-width: 599.98px) {
+    padding: var(--app-space-4);
+  }
+}

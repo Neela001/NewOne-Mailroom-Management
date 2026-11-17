@@ -1,0 +1,281 @@
+<div class="dialog-header">
+  <div class="dialog-header-row">
+    <div>
+      <h2 class="dialog-title">{{ isEdit ? 'Edit Employee' : 'Add Employee' }}</h2>
+      <p class="dialog-subtitle">Select Company, then enter the Employee details, Locations and Secretaries.</p>
+    </div>
+    <app-button variant="secondary" icon="close" [iconOnly]="true" type="button" (click)="onCancelClick()">Close</app-button>
+  </div>
+
+  <div class="tab-nav" role="tablist">
+    <button type="button" role="tab" class="tab-nav-button" [class.tab-nav-button--active]="activeTab() === 'details'" (click)="setTab('details')">
+      <app-icon name="badge" [size]="15" />
+      Employee details
+    </button>
+    <button type="button" role="tab" class="tab-nav-button" [class.tab-nav-button--active]="activeTab() === 'locations'" (click)="setTab('locations')">
+      <app-icon name="location_on" [size]="15" />
+      Locations
+      @if (locations().length > 0) {
+        <span class="tab-count-pill">{{ locations().length }}</span>
+      }
+    </button>
+    <button type="button" role="tab" class="tab-nav-button" [class.tab-nav-button--active]="activeTab() === 'secretaries'" (click)="setTab('secretaries')">
+      <app-icon name="support_agent" [size]="15" />
+      Secretaries
+      @if (secretaries().length > 0) {
+        <span class="tab-count-pill">{{ secretaries().length }}</span>
+      }
+    </button>
+  </div>
+</div>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()" (keydown.enter)="onEnterKey($event)">
+  <div class="dialog-content">
+    <!-- ========================= TAB 1: EMPLOYEE DETAILS ========================= -->
+    <div class="employee-form-panel" [hidden]="activeTab() !== 'details'">
+      <div class="form-row">
+        <app-combobox
+          class="col-half"
+          label="Company"
+          [required]="true"
+          [options]="companyOptions()"
+          [loading]="masterDataLoading()"
+          [error]="masterDataError()"
+          formControlName="companyId"
+          placeholder="Select a company…"
+          noResultsText="No active companies found."
+          [invalid]="!!(form.get('companyId')?.invalid && form.get('companyId')?.touched)"
+          errorText="Company is required"
+        />
+        <app-input
+          class="col-half"
+          label="Employee Code"
+          [required]="true"
+          formControlName="employeeCode"
+          [invalid]="!!(form.get('employeeCode')?.invalid && form.get('employeeCode')?.touched)"
+          errorText="Employee Code is required"
+        />
+      </div>
+
+      <div class="form-row">
+        <app-input
+          class="col-half"
+          label="Full Name"
+          [required]="true"
+          formControlName="fullName"
+          [invalid]="!!(form.get('fullName')?.invalid && form.get('fullName')?.touched)"
+          errorText="Full Name is required"
+        />
+        <app-select class="col-half" label="Gender" [options]="genderOptions" formControlName="gender" placeholder="Select…" />
+      </div>
+
+      <div class="form-row">
+        <app-combobox class="col-half" label="Branch" [options]="branchOptions()" [loading]="masterDataLoading()" formControlName="branchId" placeholder="Select a branch…" noResultsText="No eligible branches for this company." />
+        <app-combobox class="col-half" label="Division" [options]="divisionOptions()" [loading]="masterDataLoading()" formControlName="divisionId" placeholder="Select a division…" noResultsText="No eligible divisions for this company." />
+      </div>
+
+      <div class="form-row">
+        <app-combobox class="col-half" label="Department" [options]="departmentOptions()" [loading]="masterDataLoading()" formControlName="departmentId" placeholder="Select a department…" noResultsText="No eligible departments for this company." />
+        <app-combobox class="col-half" label="Cost Center" [options]="costCenterOptions()" [loading]="masterDataLoading()" formControlName="costCenterId" placeholder="Select a cost center…" noResultsText="No eligible cost centers for this company." />
+      </div>
+
+      <div class="form-row">
+        <app-combobox class="col-half" label="Designation" [options]="designationOptions()" [loading]="masterDataLoading()" formControlName="designationId" placeholder="Select a designation…" noResultsText="No eligible designations for this company." />
+        <app-combobox
+          class="col-half"
+          label="Reporting Manager"
+          [options]="reportingManagerOptions()"
+          [loading]="masterDataLoading()"
+          formControlName="reportingManagerId"
+          placeholder="Select a reporting manager…"
+          noResultsText="No eligible employees for this company."
+        />
+      </div>
+
+      <div class="form-row">
+        <app-input class="col-half" label="Cabin Name" formControlName="cabinName" />
+        <app-input class="col-half" label="Email" formControlName="emailId" />
+      </div>
+
+      <div class="form-row">
+        <app-input class="col-half" label="Mobile Number" formControlName="mobileNo" />
+        <app-input class="col-half" label="Joining Date" type="date" formControlName="dateOfJoining" />
+      </div>
+
+      <div class="form-row">
+        <div class="col-full secretary-summary-row">
+          <span class="secretary-summary-badge" [class.secretary-summary-badge--yes]="secretaryFlag()">
+            <app-icon [name]="secretaryFlag() ? 'check_circle_outline' : 'cancel'" [size]="15" />
+            Has assigned secretary: {{ secretaryFlag() ? 'Yes' : 'No' }}
+          </span>
+          <span class="assignment-summary-text">
+            {{ locations().length }} location(s) assigned · {{ secretaries().length }} secretary(ies) assigned
+          </span>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <app-textarea class="col-full" label="Remarks" formControlName="remarks" />
+      </div>
+    </div>
+
+    <!-- ========================= TAB 2: LOCATIONS ========================= -->
+    <div class="employee-form-panel locations-panel" [hidden]="activeTab() !== 'locations'">
+      <div class="form-row">
+        <app-combobox
+          class="col-half"
+          label="Site"
+          [options]="siteOptions()"
+          [loading]="masterDataLoading()"
+          [ngModel]="selectedSiteId()"
+          (ngModelChange)="onSiteChange($event)"
+          [ngModelOptions]="{ standalone: true }"
+          placeholder="Select a site…"
+          noResultsText="No active sites found."
+        />
+      </div>
+
+      <div class="locations-grids">
+        <div class="location-grid-section">
+          <div class="location-grid-heading">
+            <h3>Available Workstations for Selected Site ({{ availableWorkstationRows().length }})</h3>
+            <app-button variant="primary" size="sm" icon="add" type="button" [disabled]="!selectedAvailableKey()" (click)="addWorkstation()">Add workstation</app-button>
+          </div>
+          @if (!selectedSiteId()) {
+            <p class="empty-hint">Select a Site above to load its available workstations.</p>
+          } @else if (locationOptionsLoading()) {
+            <p class="empty-hint">Loading available workstations…</p>
+          } @else if (locationOptionsError()) {
+            <p class="empty-hint empty-hint--error">Couldn't load available workstations for this site.</p>
+          } @else if (availableWorkstationRows().length === 0) {
+            <p class="empty-hint">No available workstations for this site.</p>
+          } @else {
+            <div class="grid-table-scroll">
+              <table class="grid-table">
+                <thead>
+                  <tr>
+                    <th>Building</th>
+                    <th>Floor</th>
+                    <th>Wing</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of availableWorkstationRows(); track row.wingId + '|' + row.floorId + '|' + row.buildingId) {
+                    <tr class="cursor-pointer" [class.row--selected]="isAvailableRowSelected(row)" (click)="selectAvailableRow(row)" (dblclick)="addWorkstation(row)">
+                      <td>{{ row.buildingName || '—' }}</td>
+                      <td>{{ row.floorName || '—' }}</td>
+                      <td>{{ row.wingName || '—' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+
+        <div class="location-grid-section">
+          <div class="location-grid-heading">
+            <h3>Assigned Workstations – All Sites ({{ locations().length }})</h3>
+            <app-button variant="danger" size="sm" icon="delete" type="button" [disabled]="!selectedAssignedKey()" (click)="removeWorkstation()">Remove workstation</app-button>
+          </div>
+          @if (locations().length === 0) {
+            <p class="empty-hint">No workstations assigned yet.</p>
+          } @else {
+            <div class="grid-table-scroll">
+              <table class="grid-table">
+                <thead>
+                  <tr>
+                    <th>Site</th>
+                    <th>Building</th>
+                    <th>Floor</th>
+                    <th>Wing</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of locations(); track row.siteId + '|' + row.buildingId + '|' + row.floorId + '|' + row.wingId) {
+                    <tr class="cursor-pointer" [class.row--selected]="isAssignedRowSelected(row)" (click)="selectAssignedRow(row)">
+                      <td>{{ row.siteName || '—' }}</td>
+                      <td>{{ row.buildingName || '—' }}</td>
+                      <td>{{ row.floorName || '—' }}</td>
+                      <td>{{ row.wingName || '—' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================= TAB 3: SECRETARIES ========================= -->
+    <div class="employee-form-panel secretaries-panel" [hidden]="activeTab() !== 'secretaries'">
+      <div class="form-row">
+        <app-combobox
+          class="col-full"
+          label="Search employee"
+          [options]="secretaryCandidateOptions()"
+          [loading]="masterDataLoading()"
+          [ngModel]="secretarySearchValue()"
+          (ngModelChange)="onSecretarySearchSelect($event)"
+          [ngModelOptions]="{ standalone: true }"
+          placeholder="Search for an employee…"
+          noResultsText="No eligible employees found."
+        />
+      </div>
+      <p class="empty-hint secretary-helper-text">Search for an employee and select a result to add them below. Repeat to assign more secretaries, then Save employee.</p>
+
+      <div class="location-grid-heading">
+        <h3>Assigned secretaries ({{ secretaries().length }})</h3>
+        <app-button variant="danger" size="sm" icon="delete" type="button" [disabled]="!selectedSecretaryKey()" (click)="removeSecretary()">Remove secretary</app-button>
+      </div>
+      @if (secretaries().length === 0) {
+        <p class="empty-hint">No secretaries assigned yet.</p>
+      } @else {
+        <div class="grid-table-scroll">
+          <table class="grid-table">
+            <thead>
+              <tr>
+                <th>Employee Code</th>
+                <th>Employee Name</th>
+                <th>Email</th>
+                <th>Department</th>
+                <th>Branch</th>
+                <th>Company</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of secretaries(); track row.secretaryEmployeeId) {
+                <tr class="cursor-pointer" [class.row--selected]="isSecretaryRowSelected(row)" (click)="selectSecretaryRow(row)">
+                  <td>{{ row.secretaryEmployeeCode || '—' }}</td>
+                  <td>{{ row.secretaryEmployeeName || '—' }}</td>
+                  <td>{{ row.secretaryEmailId || '—' }}</td>
+                  <td>{{ row.secretaryDepartmentName || '—' }}</td>
+                  <td>{{ row.secretaryBranchName || '—' }}</td>
+                  <td>{{ row.secretaryCompanyName || '—' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+      <p class="empty-hint secretary-helper-text">Selecting a row above and clicking "Remove secretary" unassigns it. Changes apply when you click Save employee.</p>
+    </div>
+
+    @if (errorMessage()) {
+      <p class="form-error">{{ errorMessage() }}</p>
+    }
+  </div>
+
+  <div class="dialog-footer">
+    <div class="required-hint">
+      <p>* Required fields</p>
+      <p>{{ helperText() }}</p>
+    </div>
+    <div class="dialog-footer-actions">
+      <app-button variant="muted" icon="refresh" type="button" [disabled]="masterDataLoading() || saving()" (click)="reloadData()">Reload data</app-button>
+      <app-button variant="secondary" icon="cancel" type="button" (click)="onCancelClick()" [disabled]="saving()">Cancel</app-button>
+      <app-button variant="navy" icon="save" type="submit" [loading]="saving()" [disabled]="saving()">{{ isEdit ? 'Update Employee' : 'Save Employee' }}</app-button>
+    </div>
+  </div>
+</form>

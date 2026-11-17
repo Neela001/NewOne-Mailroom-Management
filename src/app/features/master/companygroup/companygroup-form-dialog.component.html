@@ -1,0 +1,53 @@
+<div class="dialog-header">
+  <div class="dialog-header-row">
+    <div>
+      <h2 class="dialog-title">{{ isEdit ? 'Edit Company Group' : 'Add Company Group' }}</h2>
+      <p class="dialog-subtitle">Enter Company Group details. Fields marked * are required.</p>
+    </div>
+    <app-button variant="secondary" icon="close" [iconOnly]="true" type="button" (click)="onCancelClick()">Close</app-button>
+  </div>
+</div>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()" (keydown.enter)="onEnterKey($event)">
+  <div class="dialog-content">
+    <div class="companygroup-form-panel">
+      <div class="form-row">
+        <app-input
+          class="col-half"
+          label="Company Group Code"
+          [required]="true"
+          formControlName="companyGroupCode"
+          [invalid]="!!(form.get('companyGroupCode')?.invalid && form.get('companyGroupCode')?.touched)"
+          errorText="Company Group Code is required"
+        />
+        <app-input
+          class="col-half"
+          label="Company Group Name"
+          [required]="true"
+          formControlName="companyGroupName"
+          [invalid]="!!(form.get('companyGroupName')?.invalid && form.get('companyGroupName')?.touched)"
+          errorText="Company Group Name is required"
+        />
+      </div>
+
+      <div class="form-row">
+        <app-textarea class="col-full" label="Remarks" formControlName="remarks" />
+      </div>
+    </div>
+
+    @if (errorMessage()) {
+      <p class="form-error">{{ errorMessage() }}</p>
+    }
+  </div>
+
+  <div class="dialog-footer">
+    <div class="required-hint">
+      <p>* Required fields</p>
+      <p>{{ isEdit ? 'Update the Company Group details.' : 'Create a new Company Group.' }}</p>
+    </div>
+    <div class="dialog-footer-actions">
+      <app-button variant="secondary" icon="cancel" type="button" (click)="onCancelClick()" [disabled]="saving()">Cancel</app-button>
+      <app-button variant="navy" icon="save" type="submit" [loading]="saving()" [disabled]="saving()">{{ isEdit ? 'Update Company Group' : 'Save Company Group' }}</app-button>
+    </div>
+  </div>
+</form>

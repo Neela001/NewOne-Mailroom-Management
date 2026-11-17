@@ -1,0 +1,115 @@
+<div class="login-page">
+  <div class="login-brand-panel">
+    <div class="login-brand-pattern" aria-hidden="true">
+      <app-icon name="mail_outline" [size]="420" class="login-brand-pattern-icon login-brand-pattern-mail" />
+      <app-icon name="description" [size]="200" class="login-brand-pattern-icon login-brand-pattern-doc" />
+    </div>
+    <div class="login-brand-content">
+      <span class="login-brand-mark"><img src="assets/branding/newone-logo.png" alt="NewOne" /></span>
+      <div class="login-brand-name">
+        <h1>NewOne</h1>
+      </div>
+      <p class="login-brand-tagline">Intelligent Mail &amp; Operations Management</p>
+      <p class="login-brand-description">
+        A single workspace for inward &amp; outward mail, facilities, and workforce administration — built around real,
+        per-user permissions for every screen.
+      </p>
+      <ul class="login-brand-features">
+        <li class="login-brand-feature">
+          <span class="login-brand-feature-icon"><app-icon name="mail_outline" [size]="17" /></span>
+          <span class="login-brand-feature-text">Inward &amp; outward mail operations</span>
+        </li>
+        <li class="login-brand-feature">
+          <span class="login-brand-feature-icon"><app-icon name="apartment" [size]="17" /></span>
+          <span class="login-brand-feature-text">Facilities &amp; workforce master data</span>
+        </li>
+        <li class="login-brand-feature">
+          <span class="login-brand-feature-icon"><app-icon name="verified_user" [size]="17" /></span>
+          <span class="login-brand-feature-text">Secure, role-based access</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="login-form-panel">
+    <div>
+      <div class="login-mobile-brand">
+        <span class="login-mobile-brand-mark"><img src="assets/branding/newone-logo.png" alt="NewOne" /></span>
+        <span class="login-mobile-brand-text">
+          <span class="login-mobile-brand-name">NewOne</span>
+          <span class="login-mobile-brand-tagline">Intelligent Mail &amp; Operations Management</span>
+        </span>
+      </div>
+
+      <div class="login-form-card">
+        <div class="login-card-header">
+          <h2>Sign in with OTP</h2>
+          <p>{{ step() === 1 ? 'Enter your credentials to request a one-time code' : 'Enter the 6-digit code sent to you' }}</p>
+        </div>
+
+        @if (step() === 1) {
+          <form [formGroup]="step1Form" (ngSubmit)="requestOtp()" class="login-form" autocomplete="off">
+            <app-input class="full-width" label="Username" size="lg" prefixIcon="person_outline" formControlName="userName" autocomplete="username" />
+
+            <app-input class="full-width" label="Password" size="lg" type="password" [revealable]="true" prefixIcon="lock_outline" formControlName="password" autocomplete="current-password" />
+
+            <div class="captcha-block">
+              <span class="captcha-block-label">Security verification</span>
+              <div class="captcha-row">
+                <div class="captcha-col captcha-col--image">
+                  <span class="captcha-col-label-spacer" aria-hidden="true">&nbsp;</span>
+                  <div class="captcha-chip">
+                    @if (captchaImageSrc()) {
+                      <img [src]="captchaImageSrc()" alt="Captcha" class="captcha-image" />
+                    } @else if (captchaFailed()) {
+                      <app-icon name="error_outline" [size]="20" class="captcha-failed-icon" title="Captcha failed to load" />
+                    } @else {
+                      <span class="h-5 w-5 animate-spin rounded-full border-2 border-navy-200 border-t-brand-600"></span>
+                    }
+                    <app-button
+                      variant="ghost"
+                      size="sm"
+                      [iconOnly]="true"
+                      icon="refresh"
+                      [title]="captchaFailed() ? 'Retry loading captcha' : 'Refresh code'"
+                      [disabled]="captchaLoading()"
+                      (click)="refreshCaptcha()"
+                    >
+                      Refresh captcha
+                    </app-button>
+                  </div>
+                </div>
+                <div class="captcha-col captcha-col--input">
+                  <app-input label="Enter code" size="lg" formControlName="captchaCode" autocomplete="off" />
+                </div>
+              </div>
+            </div>
+
+            @if (errorMessage()) {
+              <p class="login-error"><app-icon name="error_outline" [size]="16" /><span>{{ errorMessage() }}</span></p>
+            }
+
+            @if (!captchaReady() && !captchaLoading()) {
+              <p class="captcha-gate-hint"><app-icon name="info_outline" [size]="16" /><span>Please load the CAPTCHA before continuing.</span></p>
+            }
+
+            <app-button type="submit" size="lg" class="full-width submit-button" icon="sms" [loading]="loading()" [disabled]="loading() || !captchaReady()">Request OTP</app-button>
+          </form>
+        } @else {
+          <form [formGroup]="step2Form" (ngSubmit)="verifyOtp()" class="login-form" autocomplete="off">
+            <app-input class="full-width" label="6-digit code" size="lg" prefixIcon="password" formControlName="otp" autocomplete="one-time-code" />
+
+            @if (errorMessage()) {
+              <p class="login-error"><app-icon name="error_outline" [size]="16" /><span>{{ errorMessage() }}</span></p>
+            }
+
+            <app-button type="submit" size="lg" class="full-width submit-button" icon="check_circle_outline" [loading]="loading()" [disabled]="loading()">Verify &amp; Sign In</app-button>
+            <app-button variant="secondary" size="lg" type="button" class="full-width back-button" (click)="backToStep1()">Back</app-button>
+          </form>
+        }
+
+        <p class="switch-link"><a routerLink="/login">Sign in with password instead</a></p>
+      </div>
+    </div>
+  </div>
+</div>

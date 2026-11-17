@@ -1,0 +1,49 @@
+<div class="dialog-header">
+  <div class="dialog-header-row">
+    <div>
+      <h2 class="dialog-title">Desks — {{ data.vendor.vendorName }}</h2>
+      <p class="dialog-subtitle">Desks currently assigned to this courier vendor.</p>
+    </div>
+    <app-button variant="secondary" icon="close" [iconOnly]="true" type="button" (click)="dialogRef.close()">Close</app-button>
+  </div>
+</div>
+
+<div class="dialog-content">
+  @if (loading()) {
+    <p class="empty-hint">Loading assigned desks…</p>
+  } @else if (error()) {
+    <p class="empty-hint empty-hint--error">Couldn't load assigned desks for this vendor.</p>
+  } @else if (rows().length === 0) {
+    <app-empty-state icon="inbox" message="No desks assigned to this vendor." />
+  } @else {
+    <div class="grid-table-scroll">
+      <table class="grid-table">
+        <thead>
+          <tr>
+            <th>Desk Code</th>
+            <th>Desk Name</th>
+            <th>Site</th>
+            <th>City</th>
+            <th>Active</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows(); track row.courierVendorDeskId) {
+            <tr>
+              <td>{{ row.deskCode || '—' }}</td>
+              <td>{{ row.deskName || '—' }}</td>
+              <td>{{ row.siteName || '—' }}</td>
+              <td>{{ row.cityName || '—' }}</td>
+              <td>{{ row.isActive ? 'Yes' : 'No' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <p class="row-count">{{ rows().length }} desk(s) assigned</p>
+  }
+</div>
+
+<div class="dialog-footer">
+  <app-button variant="muted" type="button" (click)="dialogRef.close()">Close</app-button>
+</div>

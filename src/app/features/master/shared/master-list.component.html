@@ -1,0 +1,209 @@
+<div class="app-page-card skyline-card">
+  <div class="page-header-row">
+    <div class="page-header-left">
+      <span class="page-icon-badge"><app-icon [name]="headerIcon()" [size]="26" /></span>
+      <div>
+        <h2 class="app-page-title">{{ config.entityLabel }} Master</h2>
+        <p class="app-page-subtitle">Manage {{ config.entityLabelPlural.toLowerCase() }} and related settings</p>
+      </div>
+    </div>
+    @if (rights().canAdd) {
+      <app-button variant="primary" icon="add" class="header-add-button" (click)="openAdd()">Add {{ config.entityLabel }}</app-button>
+    }
+  </div>
+
+  @if (menuService.hasLoaded() && !rights().canView) {
+    <app-empty-state class="access-denied-row" icon="lock" [message]="'You don\'t have permission to view ' + config.entityLabelPlural.toLowerCase() + '.'" />
+  } @else {
+    <div class="toolbar-pill-row" [class.toolbar-pill-row--compact]="hasExtraFilters()">
+      @if (config.extraFiltersPosition === 'before-search') {
+        @for (filter of config.extraFilters ?? []; track filter.key) {
+          <app-select
+            class="extra-filter-select"
+            [options]="extraFilterOptions()[filter.key] ?? []"
+            [ngModel]="extraFilterValues()[filter.key]"
+            (ngModelChange)="setExtraFilter(filter.key, $event)"
+            [ngModelOptions]="{ standalone: true }"
+          />
+        }
+      }
+      <div class="search-pill">
+        <button type="button" class="search-pill-icon-button" (click)="search()" aria-label="Search">
+          <app-icon name="search" [size]="17" />
+        </button>
+        <input
+          type="text"
+          class="search-pill-input"
+          [placeholder]="'Search ' + config.entityLabelPlural.toLowerCase() + '…'"
+          [ngModel]="searchDisplay()"
+          (ngModelChange)="searchDisplay.set($event)"
+          (keydown.enter)="search()"
+          aria-label="Search"
+        />
+        @if (!hasExtraFilters()) {
+          <span class="search-pill-kbd">⌘K</span>
+        }
+      </div>
+      @if (!hasExtraFilters()) {
+        <span class="toolbar-divider" aria-hidden="true"></span>
+      }
+      <app-select
+        class="active-filter-select"
+        leadingIcon="filter_list_alt"
+        [options]="activeFilterOptions"
+        [ngModel]="activeFilter()"
+        (ngModelChange)="activeFilter.set($event)"
+        [ngModelOptions]="{ standalone: true }"
+      />
+      <app-button variant="primary" icon="search" [size]="hasExtraFilters() ? 'sm' : 'md'" [disabled]="loading()" (click)="search()">Find</app-button>
+      @if (config.extraFiltersPosition !== 'before-search') {
+        @for (filter of config.extraFilters ?? []; track filter.key) {
+          <app-select
+            class="extra-filter-select"
+            [options]="extraFilterOptions()[filter.key] ?? []"
+            [ngModel]="extraFilterValues()[filter.key]"
+            (ngModelChange)="setExtraFilter(filter.key, $event)"
+            [ngModelOptions]="{ standalone: true }"
+          />
+        }
+      }
+      <app-button variant="muted" icon="refresh" [size]="hasExtraFilters() ? 'sm' : 'md'" [disabled]="loading()" (click)="refresh()">Refresh</app-button>
+      @if (rights().canEdit || rights().canDelete || rights().canView) {
+        @if (!hasExtraFilters()) {
+          <span class="toolbar-divider" aria-hidden="true"></span>
+        }
+        <!-- hasExtraFilters() (Vertical Menu/Sub Menu/Role Master, currently)
+             means this toolbar genuinely has more controls than the others —
+             CONFIRMED live at 1440px: the fixed-width items alone (Active
+             select + Find + 2 extra filters + Refresh + the 3 action
+             buttons) already summed past the available row width before
+             Search took any space at all. Fitting all nine on one row (as
+             explicitly required) needed real compaction, not a layout
+             hack: a tighter search-pill minimum, narrower Active/extra-
+             filter selects (.toolbar-pill-row--compact below), size="sm"
+             on every toolbar button, and dropping the purely decorative
+             divider lines/⌘K hint to reclaim their own gap slots. Every
+             other entity (no extraFilters) is completely unaffected —
+             none of this is gated on anything but hasExtraFilters(). -->
+        <div class="toolbar-row-actions">
+          @if (rights().canEdit) {
+            <app-button variant="success" icon="edit" [size]="hasExtraFilters() ? 'sm' : 'md'" [disabled]="!selectedRow()" (click)="openEdit()">Edit</app-button>
+          }
+          @if (rights().canDelete) {
+            <app-button variant="danger" icon="delete" [size]="hasExtraFilters() ? 'sm' : 'md'" [disabled]="!selectedRow()" (click)="deleteRow()">Delete</app-button>
+          }
+          @if (rights().canView) {
+            <app-button variant="info" icon="history" [size]="hasExtraFilters() ? 'sm' : 'md'" [disabled]="!selectedRow()" (click)="openViewHistory()">View History</app-button>
+          }
+          @if (config.secondaryAction; as action) {
+            <app-button variant="navy" [icon]="action.icon" [size]="hasExtraFilters() ? 'sm' : 'md'" [disabled]="!selectedRow()" (click)="openSecondaryAction()">{{ action.label }}</app-button>
+          }
+        </div>
+      }
+    </div>
+
+    @if (loading()) {
+      <div class="app-table-scroll">
+        @for (i of skeletonRows; track i) {
+          <div class="app-skeleton-row">
+            @for (col of config.columns; track col.key) {
+              <div class="app-skeleton-block" style="width: 110px"></div>
+            }
+            <div class="app-skeleton-block" style="width: 50px"></div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="app-table-scroll">
+        <table class="w-full border-collapse text-sm" [class.table-fixed-cols]="hasColumnWidths()">
+          <thead>
+            <tr class="table-head-row">
+              @for (col of config.columns; track col.key) {
+                <th class="sortable-th" [style.width]="col.width" (click)="toggleSort(col.key)">
+                  <span class="th-label">{{ col.label }}</span>
+                  <app-icon name="swap_vert" [size]="13" class="sort-icon" [class.sort-icon--active]="sortKey() === col.key" />
+                </th>
+              }
+              <th class="sortable-th" [style.width]="hasColumnWidths() ? '78px' : null" (click)="toggleSort('isActive')">
+                <span class="th-label">Active</span>
+                <app-icon name="swap_vert" [size]="13" class="sort-icon" [class.sort-icon--active]="sortKey() === 'isActive'" />
+              </th>
+              <th class="actions-th" [style.width]="hasColumnWidths() ? '56px' : null">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of pagedRows(); track row[config.idField]) {
+              <tr class="cursor-pointer" [class.row--selected]="isSelected(row)" (click)="selectRow(row)">
+                @for (col of config.columns; track col.key; let first = $first) {
+                  <td class="px-3 py-3.5 text-navy-800" [class.whitespace-nowrap]="!col.truncate" [style.width]="col.width" [style.maxWidth]="col.width">
+                    @if (col.boolean) {
+                      @if (resolveCell(row, col)) {
+                        <span class="check-circle"><app-icon name="check" [size]="12" /></span>
+                      } @else {
+                        <span class="text-navy-300">—</span>
+                      }
+                    } @else if (first) {
+                      <span class="code-pill">{{ resolveCell(row, col) }}</span>
+                    } @else if (col.truncate) {
+                      <span class="cell-truncate" [title]="resolveCell(row, col) || ''">{{ resolveCell(row, col) || '—' }}</span>
+                    } @else {
+                      {{ resolveCell(row, col) || '—' }}
+                    }
+                  </td>
+                }
+                <td class="px-3 py-3.5 whitespace-nowrap">
+                  <span class="toggle-display" [class.toggle-display--on]="row['isActive'] !== false">
+                    <span class="toggle-display-dot"></span>
+                  </span>
+                </td>
+                <td class="actions-td" (click)="$event.stopPropagation()">
+                  <button type="button" class="row-menu-trigger" [appMenuTriggerFor]="rowMenu" (click)="selectRowForMenu(row)" aria-label="Row actions">
+                    <app-icon name="more_vert" [size]="18" />
+                  </button>
+                  <app-menu #rowMenu>
+                    @if (rights().canView) {
+                      <button type="button" class="row-menu-item" (click)="openViewHistory()">
+                        <app-icon name="history" [size]="15" />
+                        <span>View History</span>
+                      </button>
+                    }
+                    @if (rights().canEdit) {
+                      <button type="button" class="row-menu-item" (click)="openEdit()">
+                        <app-icon name="edit" [size]="15" />
+                        <span>Edit</span>
+                      </button>
+                    }
+                    @if (rights().canDelete) {
+                      <button type="button" class="row-menu-item row-menu-item--danger" (click)="deleteRow()">
+                        <app-icon name="delete" [size]="15" />
+                        <span>Delete</span>
+                      </button>
+                    }
+                  </app-menu>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        @if (rows().length === 0) {
+          <app-empty-state icon="inbox" [message]="'No ' + config.entityLabelPlural.toLowerCase() + ' found.'" />
+        } @else {
+          <app-pagination [total]="rows().length" [pageSize]="pageSize" [page]="page()" (pageChange)="onPageChange($event)" />
+        }
+      </div>
+    }
+
+    <div class="footer-row">
+      <div class="footer-status">
+        <app-icon name="info_outline" [size]="20" class="footer-status-icon" />
+        <div>
+          <span class="footer-status-count">{{ rows().length }} {{ config.entityLabelPlural.toLowerCase() }}</span>
+          @if (statusMessage()) {
+            <span class="footer-status-message">{{ statusMessage() }}</span>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

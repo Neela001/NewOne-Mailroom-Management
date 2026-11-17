@@ -1,0 +1,86 @@
+<div class="dialog-header">
+  <div class="dialog-header-row">
+    <div>
+      <h2 class="dialog-title">Switch Desk</h2>
+      <p class="dialog-subtitle">Choose a desk for this session.</p>
+    </div>
+    <app-button variant="ghost" icon="close" [iconOnly]="true" size="sm" type="button" (click)="close()">Close</app-button>
+  </div>
+</div>
+
+<div class="dialog-content">
+  @if (deskContext.isLoading() && !deskContext.hasLoaded()) {
+    <div class="app-table-scroll">
+      @for (i of [1, 2, 3]; track i) {
+        <div class="app-skeleton-row">
+          <div class="app-skeleton-block" style="width: 140px"></div>
+          <div class="app-skeleton-block" style="width: 120px"></div>
+          <div class="app-skeleton-block" style="width: 120px"></div>
+          <div class="app-skeleton-block" style="width: 80px"></div>
+        </div>
+      }
+    </div>
+  } @else if (deskContext.loadError()) {
+    <app-empty-state icon="error_outline" [message]="deskContext.loadError()!" retryLabel="Retry" (retry)="reload()" />
+  } @else if (rows().length === 0) {
+    <app-empty-state icon="inbox" message="No desks are assigned to your account. Contact your administrator." />
+  } @else {
+    <div class="app-table-scroll desk-table-scroll" role="listbox" tabindex="0" aria-label="Assigned desks" (keydown)="onTableKeydown($event)">
+      <table class="w-full border-collapse text-sm">
+        <thead>
+          <tr class="table-head-row">
+            <th class="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-navy-500">Desk Name</th>
+            <th class="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-navy-500">Site</th>
+            <th class="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-navy-500">City</th>
+            <th class="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-navy-500">Default</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows(); track row.deskId) {
+            <tr
+              role="option"
+              class="cursor-pointer border-b border-navy-100 last:border-0 hover:bg-navy-50"
+              [class.row--selected]="row.deskId === highlightedDeskId()"
+              [attr.aria-selected]="row.deskId === highlightedDeskId()"
+              (click)="selectRow(row)"
+              (dblclick)="confirmSwitch()"
+            >
+              <td class="px-3 py-3 whitespace-nowrap">
+                <span class="code-pill">{{ row.deskName }}</span>
+                @if (row.deskId === deskContext.currentDesk()?.deskId) {
+                  <span class="current-desk-badge">Current</span>
+                }
+              </td>
+              <td class="px-3 py-3 text-navy-800 whitespace-nowrap">{{ row.siteName || '—' }}</td>
+              <td class="px-3 py-3 text-navy-800 whitespace-nowrap">{{ row.cityName || '—' }}</td>
+              <td class="px-3 py-3 whitespace-nowrap">
+                @if (row.isDefault) {
+                  <span class="default-badge"><app-icon name="star" [size]="13" />Default</span>
+                } @else {
+                  <span class="text-navy-300">—</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+<div class="dialog-footer">
+  <app-button variant="muted" icon="refresh" type="button" [disabled]="deskContext.isLoading()" (click)="reload()">Reload</app-button>
+  <div class="dialog-footer-actions">
+    <app-button variant="secondary" type="button" (click)="close()">Close</app-button>
+    <app-button
+      variant="navy"
+      type="button"
+      icon="swap_horiz"
+      [loading]="switching()"
+      [disabled]="!highlightedDeskId() || highlightedIsCurrent() || switching()"
+      (click)="confirmSwitch()"
+    >
+      Switch Desk
+    </app-button>
+  </div>
+</div>

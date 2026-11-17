@@ -1,0 +1,83 @@
+<div class="dialog-header dialog-header--navy">
+  <div class="dialog-header-row">
+    <div>
+      <h2 class="dialog-title">{{ isEdit ? 'Edit Company' : 'Add New Company' }}</h2>
+      <p class="dialog-subtitle">Enter the company details, then select its Company Group.</p>
+    </div>
+    <app-button variant="secondary" icon="close" [iconOnly]="true" type="button" (click)="onCancelClick()">Close</app-button>
+  </div>
+</div>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()" (keydown.enter)="onEnterKey($event)">
+  <div class="dialog-content">
+    <div class="company-form-panel">
+      <div class="form-row">
+        <app-combobox
+          class="col-full"
+          label="Company Group"
+          [required]="true"
+          [options]="companyGroupOptions()"
+          [loading]="companyGroupsLoading()"
+          [error]="companyGroupsError()"
+          formControlName="companyGroupId"
+          placeholder="Select a company group…"
+          noResultsText="No active company groups found."
+          [invalid]="!!(form.get('companyGroupId')?.invalid && form.get('companyGroupId')?.touched)"
+          errorText="Company Group is required"
+        />
+      </div>
+
+      <div class="form-row">
+        <app-input
+          class="col-full"
+          label="Company Code"
+          [required]="true"
+          formControlName="companyCode"
+          [invalid]="!!(form.get('companyCode')?.invalid && form.get('companyCode')?.touched)"
+          errorText="Company Code is required"
+        />
+      </div>
+
+      <div class="form-row">
+        <app-input
+          class="col-full"
+          label="Company Name"
+          [required]="true"
+          formControlName="companyName"
+          [invalid]="!!(form.get('companyName')?.invalid && form.get('companyName')?.touched)"
+          errorText="Company Name is required"
+        />
+      </div>
+
+      <div class="form-row">
+        <app-input class="col-full" label="Legal Name" formControlName="legalName" />
+      </div>
+
+      <div class="form-row">
+        <app-input class="col-full" label="Registration No" formControlName="registrationNo" />
+      </div>
+
+      <div class="form-row">
+        <app-input class="col-full" label="Tax Registration No" formControlName="taxRegistrationNo" />
+      </div>
+
+      <div class="form-row">
+        <app-textarea class="col-full" label="Remarks" formControlName="remarks" />
+      </div>
+    </div>
+
+    @if (errorMessage()) {
+      <p class="form-error">{{ errorMessage() }}</p>
+    }
+  </div>
+
+  <div class="dialog-footer">
+    <div class="required-hint">
+      <p>* Required fields</p>
+    </div>
+    <div class="dialog-footer-actions">
+      <app-button variant="secondary" icon="cancel" type="button" (click)="onCancelClick()" [disabled]="saving()">Cancel</app-button>
+      <app-button variant="navy" icon="save" type="submit" [loading]="saving()" [disabled]="saving()">{{ isEdit ? 'Update Company' : 'Save Company' }}</app-button>
+    </div>
+  </div>
+</form>

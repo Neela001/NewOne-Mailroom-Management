@@ -1,0 +1,81 @@
+<div class="dialog-header">
+  <div class="dialog-header-row">
+    <div>
+      <h2 class="dialog-title">{{ isEdit ? 'Edit Postal Code' : 'Add Postal Code' }}</h2>
+      <p class="dialog-subtitle">Select the location, then enter the postal code.</p>
+    </div>
+    <app-button variant="secondary" icon="close" [iconOnly]="true" type="button" (click)="onCancelClick()">Close</app-button>
+  </div>
+</div>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()" (keydown.enter)="onEnterKey($event)">
+  <div class="dialog-content">
+    <div class="postalcode-form-panel">
+      <div class="form-row">
+        <app-combobox
+          class="col-half"
+          label="Country"
+          [required]="true"
+          [options]="countryOptions()"
+          [loading]="countriesLoading()"
+          [error]="countriesError()"
+          formControlName="countryId"
+          placeholder="Select a country…"
+          noResultsText="No active countries configured for Postal Code."
+          [invalid]="!!(form.get('countryId')?.invalid && form.get('countryId')?.touched)"
+          errorText="Country is required"
+        />
+        <app-combobox
+          class="col-half"
+          label="State (optional)"
+          [options]="stateOptions()"
+          [loading]="statesLoading()"
+          [error]="statesError()"
+          formControlName="stateId"
+          placeholder="Select a state…"
+          noResultsText="No active states found for this country."
+        />
+      </div>
+
+      <div class="form-row">
+        <app-combobox
+          class="col-half"
+          label="City (optional)"
+          [options]="cityOptions()"
+          [loading]="citiesLoading()"
+          [error]="citiesError()"
+          formControlName="cityId"
+          placeholder="Select a city…"
+          noResultsText="No active cities found for this location."
+        />
+        <app-input
+          class="col-half"
+          label="Postal Code"
+          [required]="true"
+          formControlName="postalCode"
+          [invalid]="!!(form.get('postalCode')?.invalid && form.get('postalCode')?.touched)"
+          errorText="Postal Code is required"
+        />
+      </div>
+
+      <div class="form-row">
+        <app-textarea class="col-full" label="Remarks" formControlName="remarks" />
+      </div>
+    </div>
+
+    @if (errorMessage()) {
+      <p class="form-error">{{ errorMessage() }}</p>
+    }
+  </div>
+
+  <div class="dialog-footer">
+    <div class="required-hint">
+      <p>* Required fields</p>
+      <p>Choose a Country; State and City are optional.</p>
+    </div>
+    <div class="dialog-footer-actions">
+      <app-button variant="secondary" icon="cancel" type="button" (click)="onCancelClick()" [disabled]="saving()">Cancel</app-button>
+      <app-button variant="navy" icon="save" type="submit" [loading]="saving()" [disabled]="saving()">Save Postal Code</app-button>
+    </div>
+  </div>
+</form>

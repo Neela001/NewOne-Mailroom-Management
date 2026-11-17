@@ -1,0 +1,455 @@
+// ============================================================================
+// Shared visual language for the auth screens (login + OTP login) — a
+// single authored copy `@use`d by both login.component.scss and
+// otp-login.component.scss instead of two near-duplicate stylesheets (the
+// previous version had ~170 lines of copy-pasted CSS in each).
+//
+// Its own scoped override of Material's `--mat-sys-*` system tokens on
+// `.login-page`, applying the SAME enterprise blue/navy role values
+// styles.scss's own `html { }` block overrides globally for the
+// authenticated app — kept as a separate copy (rather than relying on the
+// global override alone) because the unauthenticated auth screens render
+// before the authenticated shell and its global override are in scope,
+// and because a few auth-only surfaces (the brand panel) need tokens the
+// global theme has no use for. Cascades into every Material component
+// inside `.login-page` (form fields, buttons, spinners) without touching
+// the global `mat.theme()` call every authenticated screen relies on.
+// ============================================================================
+
+.login-page {
+  // ---- Scoped system-token override ("Skyline" palette) — same values
+  // styles.scss's own `html { }` block overrides globally for the
+  // authenticated app, see this file's own header comment for why this
+  // auth-only copy exists. ----
+  --mat-sys-primary: #2f5be5;
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #dde9ff;
+  --mat-sys-on-primary-container: #182f7d;
+
+  --mat-sys-secondary: #4b5674;
+  --mat-sys-on-secondary: #ffffff;
+  --mat-sys-secondary-container: #e1e7f5;
+  --mat-sys-on-secondary-container: #37415a;
+
+  // No competing second brand hue — tertiary reuses primary azure, same as
+  // the authenticated app's own theme override in styles.scss.
+  --mat-sys-tertiary: #2f5be5;
+  --mat-sys-on-tertiary: #ffffff;
+  --mat-sys-tertiary-container: #dde9ff;
+  --mat-sys-on-tertiary-container: #182f7d;
+
+  --mat-sys-surface: #ffffff;
+  --mat-sys-on-surface: #141a2b;
+  --mat-sys-on-surface-variant: #4b5674;
+  --mat-sys-surface-container-lowest: #ffffff;
+  --mat-sys-surface-container-low: #f6f8fd;
+  --mat-sys-surface-container: #eef2fa;
+  --mat-sys-surface-container-high: #e6ecf8;
+  --mat-sys-surface-container-highest: #e1e7f5;
+  --mat-sys-outline: #99a6c6;
+  --mat-sys-outline-variant: #e1e7f5;
+  --mat-sys-background: #f6f8fd;
+  --mat-sys-on-background: #141a2b;
+
+  // Local tokens for the few things the system-token role set has no name
+  // for (the navy brand panel, its gradient and pattern).
+  --login-navy: #121a33;
+  --login-navy-700: #1b2747;
+
+  min-height: 100vh;
+  display: flex;
+  overflow-x: hidden;
+  background: var(--mat-sys-background);
+}
+
+// ----------------------------------------------------------------------------
+// Left brand panel — deep navy-to-azure gradient (not a flat fill), a
+// restrained abstract mail/document motif built from two oversized,
+// low-opacity Lucide glyphs (no stock imagery, nothing fabricated), and
+// three short, factual lines on what the product actually covers
+// (operations areas this build's own master-data screens genuinely
+// represent — company/branch/site/employee masters and real per-user
+// permissions — not invented stats or certifications).
+// ----------------------------------------------------------------------------
+.login-brand-panel {
+  position: relative;
+  flex: 1 1 44%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: var(--app-space-7);
+  background: linear-gradient(135deg, var(--login-navy) 0%, var(--login-navy-700) 45%, #2347c2 78%, var(--mat-sys-primary) 100%);
+
+  @media (max-width: 959.98px) {
+    display: none;
+  }
+}
+
+.login-brand-pattern {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+
+  // A huge flat Lucide silhouette as a background motif — no stock
+  // imagery. position:absolute on the SVG itself (app-icon's own class
+  // input passes through to its inner <svg>, see icon.component.ts's own
+  // comment) still escalates up to THIS element as its containing block,
+  // since app-icon's own host stays position:static.
+  .login-brand-pattern-icon {
+    position: absolute;
+    color: #ffffff;
+  }
+
+  &-mail {
+    opacity: 0.05;
+    right: -110px;
+    bottom: -90px;
+    transform: rotate(-8deg);
+  }
+
+  &-doc {
+    opacity: 0.045;
+    left: -50px;
+    top: -40px;
+    transform: rotate(12deg);
+  }
+}
+
+.login-brand-content {
+  position: relative;
+  z-index: 1;
+  max-width: 400px;
+  color: #ffffff;
+}
+
+.login-brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--app-radius-md);
+  background: linear-gradient(145deg, #ffffff 0%, #dde9ff 100%);
+  margin-bottom: var(--app-space-5);
+  box-shadow: var(--app-shadow-md);
+
+  // The real NewOne app icon (extracted from NewOne.Login.WinForms.exe's
+  // own PE resources — see sidenav.component.html's own comment), not
+  // styled text.
+  img {
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+  }
+}
+
+.login-brand-name {
+  display: flex;
+  align-items: baseline;
+  gap: var(--app-space-2);
+  margin: 0 0 var(--app-space-2);
+}
+
+.login-brand-name h1 {
+  font: var(--mat-sys-display-small);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.login-brand-tagline {
+  font: var(--mat-sys-title-medium);
+  font-weight: 500;
+  color: #c3cce8;
+  margin: 0 0 var(--app-space-4);
+}
+
+.login-brand-description {
+  font: var(--mat-sys-body-medium);
+  color: #c3cce8;
+  opacity: 0.92;
+  line-height: 1.6;
+  margin: 0 0 var(--app-space-6);
+}
+
+.login-brand-features {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-space-3);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.login-brand-feature {
+  display: flex;
+  align-items: center;
+  gap: var(--app-space-3);
+}
+
+.login-brand-feature-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--app-radius-sm);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+
+  app-icon {
+    color: #ffffff;
+  }
+}
+
+.login-brand-feature-text {
+  font: var(--mat-sys-body-medium);
+  color: #dbe3f7;
+}
+
+// Condensed brand strip shown only below the tablet breakpoint, where the
+// full panel above is hidden — "reduce or simplify," not disappear
+// entirely, so the product identity still reads on a phone-width login.
+.login-mobile-brand {
+  display: none;
+  align-items: center;
+  gap: var(--app-space-3);
+  padding: var(--app-space-5) var(--app-space-5) 0;
+
+  @media (max-width: 959.98px) {
+    display: flex;
+  }
+}
+
+.login-mobile-brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--app-radius-sm);
+  background: linear-gradient(145deg, #ffffff 0%, #dde9ff 100%);
+  flex: none;
+  box-shadow: var(--app-shadow-sm);
+
+  img {
+    width: 22px;
+    height: 22px;
+    object-fit: contain;
+  }
+}
+
+.login-mobile-brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+}
+
+.login-mobile-brand-name {
+  font: var(--mat-sys-title-medium);
+  font-weight: 700;
+  color: var(--mat-sys-on-surface);
+}
+
+.login-mobile-brand-tagline {
+  font: var(--mat-sys-label-small);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+// ----------------------------------------------------------------------------
+// Right form panel
+// ----------------------------------------------------------------------------
+.login-form-panel {
+  flex: 1 1 56%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--app-space-5);
+  box-sizing: border-box;
+
+  // The card itself owns its mobile side-margin (calc(100% - 32px), see
+  // .login-form-card's own mobile rule) — zeroing it out here so that
+  // margin isn't doubled on top of this panel's own padding.
+  @media (max-width: 599.98px) {
+    padding: 16px 0;
+  }
+}
+
+.login-form-card {
+  width: 100%;
+  max-width: 500px;
+  min-width: 0;
+  background: #ffffff;
+  border: none;
+  border-radius: var(--app-radius-lg);
+  box-shadow: var(--app-shadow-md);
+  padding: 40px;
+  box-sizing: border-box;
+
+  @media (max-width: 599.98px) {
+    max-width: calc(100% - 32px);
+    border-radius: var(--app-radius-md);
+    padding: 24px;
+  }
+}
+
+.login-card-header {
+  margin-bottom: 28px;
+}
+
+// Editorial serif heading — the login form's own echo of the brand
+// wordmark's typographic treatment.
+.login-card-header h2 {
+  font: var(--mat-sys-headline-small);
+  letter-spacing: -0.01em;
+  margin: 0 0 var(--app-space-1);
+  color: var(--mat-sys-on-surface);
+}
+
+.login-card-header p {
+  font: var(--mat-sys-body-medium);
+  margin: 0;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.captcha-block {
+  margin: 0;
+}
+
+.captcha-block-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--mat-sys-on-surface-variant);
+  margin-bottom: 8px;
+}
+
+// Two columns, both starting at the same top edge — the left column gets
+// an invisible label-height spacer (.captcha-col-label-spacer) matching
+// app-input's own real label row, so the image box and the code input box
+// line up at the same Y position even though only the right column has a
+// real visible label above its control. "auto 1fr" (not 1fr 1fr) because
+// the image box has a fixed natural width — stretching it to match the
+// input column would leave awkward empty space inside it; this is the
+// "visually balanced," not forced-equal, column split the brief allows.
+.captcha-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 14px;
+  align-items: start;
+  min-width: 0;
+
+  @media (max-width: 479.98px) {
+    grid-template-columns: 1fr;
+    row-gap: 12px;
+  }
+}
+
+.captcha-col {
+  min-width: 0;
+}
+
+.captcha-col-label-spacer {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
+  margin-bottom: 6px;
+  visibility: hidden;
+}
+
+.captcha-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 50px;
+  box-sizing: border-box;
+  padding: 0 10px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: var(--app-radius-sm);
+  background: var(--mat-sys-surface-container-low);
+  transition: border-color 150ms ease;
+}
+
+.captcha-image {
+  height: 34px;
+  max-width: 108px;
+  object-fit: contain;
+  border-radius: 3px;
+}
+
+.login-error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--app-space-2);
+  color: var(--mat-sys-on-error-container, #6b1a1e);
+  background: var(--mat-sys-error-container, #fbeeee);
+  border-radius: var(--app-radius-sm);
+  padding: var(--app-space-2) var(--app-space-3);
+  font: var(--mat-sys-body-small);
+  margin: 0;
+
+  app-icon {
+    flex: none;
+    margin-top: 2px;
+  }
+}
+
+// The login/OTP screens' own request for a larger, more prominent primary
+// action than the rest of the app uses (size="lg" on app-button — see
+// each template's own usage) — every button's spacing comes from the
+// parent .login-form's own flex gap, same as every other field, so
+// Sign In / OTP / Back stay evenly spaced rather than one-off margins.
+.submit-button,
+.otp-switch-button,
+.back-button {
+  width: 100%;
+}
+
+.switch-link {
+  text-align: center;
+  margin: var(--app-space-5) 0 0;
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+
+  a {
+    color: var(--mat-sys-primary);
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.captcha-failed-icon {
+  color: var(--mat-sys-error);
+}
+
+.captcha-gate-hint {
+  display: flex;
+  align-items: center;
+  gap: var(--app-space-2);
+  color: var(--mat-sys-on-surface-variant);
+  font: var(--mat-sys-body-small);
+  margin: 0;
+
+  app-icon {
+    flex: none;
+  }
+}

@@ -1,0 +1,90 @@
+// Same CDK-overlay-pane-is-flex fix as master-form-dialog.component.scss's
+// own :host rule — without it, this host (a flex item with no explicit
+// width) shrinks to its content's own minimum instead of filling the
+// 560px pane DialogService sizes it to, leaving dead space on the right
+// and a short footer divider. See that file's own comment for the full
+// measured evidence; applied here from the start rather than repeating
+// the same bug in a second dialog.
+:host {
+  display: block;
+  width: 100%;
+}
+
+.dialog-header {
+  padding: 24px 24px 0;
+}
+
+.dialog-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--app-space-3);
+}
+
+.dialog-title {
+  margin: 0 0 4px;
+  font: var(--mat-sys-title-large);
+  color: var(--mat-sys-on-surface);
+}
+
+.dialog-subtitle {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--color-navy-500);
+}
+
+.dialog-content {
+  padding: 16px 24px;
+}
+
+.desk-table-scroll {
+  border: 1px solid var(--color-navy-200);
+  border-radius: var(--app-radius-md);
+  outline: none;
+
+  &:focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+  }
+}
+
+.current-desk-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--color-success-bg);
+  color: var(--color-success-fg);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.default-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-navy-600);
+  font-size: 12.5px;
+  font-weight: 600;
+
+  app-icon {
+    color: #e3a008;
+  }
+}
+
+.dialog-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--app-space-3);
+  padding: 16px 24px 24px;
+  border-top: 1px solid var(--color-navy-200);
+  margin-top: 8px;
+}
+
+.dialog-footer-actions {
+  display: flex;
+  gap: var(--app-space-2);
+}

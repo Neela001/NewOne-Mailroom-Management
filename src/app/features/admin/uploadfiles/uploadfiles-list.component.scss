@@ -1,0 +1,55 @@
+// Shared page-header/toolbar-pill/footer/code-pill/row--selected/toolbar-
+// row-actions/app-status-chip chrome lives in styles.scss's own classes —
+// see its own comment for why this isn't duplicated per component.
+
+.uploadfiles-table {
+  table-layout: fixed;
+}
+
+.table-head-row {
+  border-bottom: 1px solid var(--color-navy-200);
+}
+
+.uploadfiles-th {
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-navy-500);
+  white-space: nowrap;
+}
+
+.center-th,
+.center-td {
+  text-align: center;
+}
+
+table tbody tr {
+  &:hover {
+    background: var(--color-navy-50);
+  }
+}
+
+.uploadfiles-truncate {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.uploadfiles-failed-count {
+  font-weight: 600;
+  color: var(--app-status-error-fg);
+}
+
+// No global --info status-chip modifier exists yet (only success/error/
+// neutral, used by UserAudit's own result column) — scoped here rather
+// than added to styles.scss since it's specific to a non-terminal
+// processing/pending state this screen alone currently needs.
+.app-status-chip--info {
+  background: var(--color-brand-50);
+  color: var(--color-brand-700);
+}

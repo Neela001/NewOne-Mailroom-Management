@@ -1,0 +1,80 @@
+// Everything expressible as a Tailwind utility lives directly in the
+// template now (see its own comment) — colors use the SAME hex values
+// declared in tailwind.css's own @theme block (brand-500 #5a5de0, brand-400
+// #7b7fee — one indigo accent, no competing teal), written literally rather
+// than via var(--color-*): Tailwind v4
+// only emits a theme color as a real :root custom property when it
+// detects an actual utility class using that exact shade somewhere in the
+// scanned templates, and this file's own rules aren't template-scanned
+// usage, so relying on the variable existing was unreliable in practice
+// (confirmed live).
+//
+// Both blocks below sit in one of Tailwind's own cascade layers
+// (tailwind.css declares `@layer theme, base, components, utilities;` and
+// loads first — see angular.json's own styles order, and styles.scss's
+// own comment for the fuller explanation), but in TWO DIFFERENT layers,
+// deliberately:
+//   - structural/reset rules go in "base" (lower priority than
+//     "utilities") — CONFIRMED LIVE that leaving a rule like
+//     `button.menu-row { all: unset; }` unlayered let it beat Tailwind's
+//     own `.flex` utility (`all: unset` resets `display` to its initial
+//     value), silently breaking every branch <button>'s layout.
+//   - `.menu-row-active`, which must OVERRIDE a plain utility class
+//     already on the same element (the base `text-navy-300`), needs to
+//     outrank "utilities" itself — CONFIRMED LIVE that putting it in
+//     "base" let `text-navy-300` win instead, since within the layer
+//     system "utilities" outranks "base" regardless of selector order.
+//     Reusing Tailwind's own "utilities" layer name lets normal same-layer
+//     cascade rules (source order) decide the tie, and this rule — in a
+//     component stylesheet injected after the page's own global one — is
+//     later in document order, so it wins.
+@layer base {
+  :host {
+    display: block;
+  }
+
+  button.menu-row {
+    all: unset;
+    box-sizing: border-box;
+  }
+
+  .menu-branch-children {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+
+    &--open {
+      grid-template-rows: 1fr;
+    }
+  }
+}
+
+@layer utilities {
+  // The active leaf's own treatment — a real ::before pseudo-element (the
+  // left accent bar) a plain Tailwind class list can't add, plus a color
+  // override that needs to beat the leaf's own base text-navy-300 class.
+  .menu-row-active {
+    background-color: color-mix(in srgb, #5a5de0 20%, transparent);
+    color: #ffffff;
+    font-weight: 700;
+    box-shadow: inset 0 0 0 1px rgba(123, 127, 238, 0.25);
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 6px;
+      bottom: 6px;
+      width: 3px;
+      border-radius: 0 3px 3px 0;
+      background: #7b7fee;
+      box-shadow: 0 0 8px 0 rgba(123, 127, 238, 0.55);
+    }
+
+    &:hover {
+      background-color: color-mix(in srgb, #5a5de0 20%, transparent);
+      color: #ffffff;
+      transform: none;
+    }
+  }
+}

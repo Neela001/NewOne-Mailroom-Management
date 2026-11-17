@@ -1,0 +1,55 @@
+<div class="dialog-header">
+  <div class="dialog-header-row">
+    <div>
+      <h2 class="dialog-title">{{ isEdit ? 'Edit State' : 'Add State' }}</h2>
+      <p class="dialog-subtitle">Fill the required fields, then save the state.</p>
+    </div>
+    <app-button variant="secondary" icon="close" [iconOnly]="true" type="button" (click)="onCancelClick()">Close</app-button>
+  </div>
+</div>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()" (keydown.enter)="onEnterKey($event)">
+  <div class="dialog-content">
+    <div class="state-form-panel">
+      <div class="form-row">
+        <app-combobox
+          class="col-wide"
+          label="Country"
+          [required]="true"
+          [options]="countryOptions()"
+          [loading]="countriesLoading()"
+          [error]="countriesError()"
+          formControlName="countryId"
+          placeholder="Select a country…"
+          noResultsText="No active countries configured for States."
+          [invalid]="!!(form.get('countryId')?.invalid && form.get('countryId')?.touched)"
+          errorText="Country is required"
+        />
+        <app-input class="col-narrow" label="State Code" formControlName="stateCode" />
+      </div>
+
+      <div class="form-row">
+        <app-input class="col-full" label="State Name" [required]="true" formControlName="stateName" [invalid]="!!(form.get('stateName')?.invalid && form.get('stateName')?.touched)" errorText="State Name is required" />
+      </div>
+
+      <div class="form-row">
+        <app-textarea class="col-full" label="Remarks" formControlName="remarks" />
+      </div>
+    </div>
+
+    @if (errorMessage()) {
+      <p class="form-error">{{ errorMessage() }}</p>
+    }
+  </div>
+
+  <div class="dialog-footer">
+    <div class="required-hint">
+      <p>* Required fields</p>
+      <p>Select an active Country that supports States.</p>
+    </div>
+    <div class="dialog-footer-actions">
+      <app-button variant="secondary" icon="cancel" type="button" (click)="onCancelClick()" [disabled]="saving()">Cancel</app-button>
+      <app-button variant="navy" icon="save" type="submit" [loading]="saving()" [disabled]="saving()">Save State</app-button>
+    </div>
+  </div>
+</form>

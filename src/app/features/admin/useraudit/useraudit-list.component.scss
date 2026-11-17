@@ -1,0 +1,103 @@
+// Shared card/header/table/toolbar-pill/status-chip styling lives in the
+// global `.app-page-*` / `.app-table-scroll` / `.toolbar-pill-row` /
+// `.app-status-chip*` classes — see styles.scss's own comment for why this
+// isn't duplicated per component.
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--app-space-3) var(--app-space-4);
+  margin-bottom: var(--app-space-3);
+
+  @media (max-width: 999.98px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 599.98px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.date-field {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--app-space-2);
+
+  > app-input {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  // Cosmetic only — see useraudit-list.component.ts's own comment for why
+  // the native input itself stays editable; what actually matters is
+  // search() ignoring this value while its own checkbox is unchecked.
+  &--disabled {
+    opacity: 0.55;
+  }
+}
+
+.filter-info {
+  margin: 0 0 var(--app-space-4);
+  font-size: 12.5px;
+  color: var(--color-navy-500);
+}
+
+.audit-toolbar {
+  margin-bottom: var(--app-space-4);
+}
+
+.scope-info {
+  margin-left: var(--app-space-2);
+  font-size: 13px;
+  color: var(--color-navy-600);
+  white-space: nowrap;
+}
+
+.audit-error {
+  margin: 0 0 var(--app-space-3);
+  padding: 10px 14px;
+  border-radius: var(--app-radius-sm);
+  background: var(--color-error-bg);
+  color: var(--color-error-fg);
+  font-size: 13px;
+}
+
+.audit-table {
+  table-layout: fixed;
+}
+
+.table-head-row {
+  border-bottom: 1px solid var(--color-navy-200);
+}
+
+.audit-th {
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-navy-500);
+  white-space: nowrap;
+}
+
+table tbody tr {
+  border-bottom: 1px solid var(--color-navy-100);
+
+  &:hover {
+    background: var(--color-navy-50);
+  }
+}
+
+.path-cell {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 0.8rem;
+}
+
+.audit-truncate {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

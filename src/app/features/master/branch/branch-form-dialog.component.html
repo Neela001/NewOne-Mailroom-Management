@@ -1,0 +1,194 @@
+<div class="dialog-header">
+  <div class="dialog-header-row">
+    <div>
+      <h2 class="dialog-title">{{ isEdit ? 'Edit Branch' : 'Add Branch' }}</h2>
+      <p class="dialog-subtitle">Company → Country → City → Site. Other location details load from Site.</p>
+    </div>
+    <app-button variant="secondary" icon="close" [iconOnly]="true" type="button" (click)="onCancelClick()">Close</app-button>
+  </div>
+</div>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()" (keydown.enter)="onEnterKey($event)">
+  <div class="dialog-content">
+    <div class="branch-form-panel">
+      <div class="form-row form-row--three">
+        <app-combobox
+          class="col-1of3"
+          label="Company"
+          [required]="true"
+          [options]="companyOptions()"
+          [loading]="companiesLoading()"
+          [error]="companiesError()"
+          formControlName="companyId"
+          placeholder="Select a company…"
+          noResultsText="No active companies found."
+          [invalid]="!!(form.get('companyId')?.invalid && form.get('companyId')?.touched)"
+          errorText="Company is required"
+        />
+        <app-input
+          class="col-1of3"
+          label="Branch Code"
+          [required]="true"
+          formControlName="branchCode"
+          [invalid]="!!(form.get('branchCode')?.invalid && form.get('branchCode')?.touched)"
+          errorText="Branch Code is required"
+        />
+        <app-input
+          class="col-1of3"
+          label="Branch Name"
+          [required]="true"
+          formControlName="branchName"
+          [invalid]="!!(form.get('branchName')?.invalid && form.get('branchName')?.touched)"
+          errorText="Branch Name is required"
+        />
+      </div>
+
+      <div class="form-row">
+        <app-input class="col-half" label="Address Line 1" formControlName="addressLine1" />
+        <app-input class="col-half" label="Address Line 2" formControlName="addressLine2" />
+      </div>
+
+      <div class="form-row">
+        <app-input class="col-half" label="Address Line 3" formControlName="addressLine3" />
+        <app-combobox
+          class="col-half"
+          label="Country"
+          [required]="true"
+          [options]="countryOptions()"
+          [loading]="countriesLoading()"
+          [error]="countriesError()"
+          formControlName="countryId"
+          placeholder="Select a country…"
+          noResultsText="No active countries found."
+          [invalid]="!!(form.get('countryId')?.invalid && form.get('countryId')?.touched)"
+          errorText="Country is required"
+        />
+      </div>
+
+      <div class="form-row">
+        <app-combobox
+          class="col-half"
+          label="City"
+          [required]="true"
+          [options]="cityOptions()"
+          [loading]="citiesLoading()"
+          [error]="citiesError()"
+          formControlName="cityId"
+          placeholder="Select a city…"
+          noResultsText="No active cities found for this country."
+          [invalid]="!!(form.get('cityId')?.invalid && form.get('cityId')?.touched)"
+          errorText="City is required"
+        />
+        <app-combobox
+          class="col-half"
+          label="Site"
+          [required]="true"
+          [options]="siteOptions()"
+          [loading]="sitesLoading()"
+          [error]="sitesError()"
+          formControlName="siteId"
+          placeholder="Select a site…"
+          noResultsText="No active sites found for this city."
+          [invalid]="!!(form.get('siteId')?.invalid && form.get('siteId')?.touched)"
+          errorText="Site is required"
+        />
+      </div>
+
+      <div class="form-row form-row--three">
+        <app-input class="col-1of3" label="State" formControlName="stateDisplay" />
+        <app-input class="col-1of3" label="Postal Code" formControlName="postalCodeDisplay" />
+        <app-input class="col-1of3" label="Area" formControlName="areaDisplay" />
+      </div>
+
+      <div class="form-row form-row--three">
+        <app-input class="col-1of3" label="Phone" formControlName="phoneNo" />
+        <app-input class="col-1of3" label="Alternate Phone" formControlName="alternatePhoneNo" />
+        <app-input
+          class="col-1of3"
+          label="Email"
+          formControlName="emailId"
+          [invalid]="!!(form.get('emailId')?.invalid && form.get('emailId')?.touched)"
+          errorText="Enter a valid email address"
+        />
+      </div>
+
+      <div class="form-row">
+        <app-textarea class="col-full" label="Remarks" formControlName="remarks" />
+      </div>
+    </div>
+
+    <div class="location-section">
+      <div class="location-section-header">
+        <h3 class="location-section-title">Branch Location Selection</h3>
+        <p class="location-section-description">Select the required Building / Floor / Wing rows.</p>
+        <p class="location-section-count">{{ selectedLocationCount() }} selected in loaded Site grids</p>
+      </div>
+
+      @if (!form.get('siteId')!.value) {
+        <div class="location-empty-hint">
+          <app-icon name="info_outline" [size]="18" />
+          <span>Select a Site above to load its Building / Floor / Wing combinations.</span>
+        </div>
+      } @else if (locationGridLoading()) {
+        <div class="location-loading">
+          @for (i of [1, 2, 3]; track i) {
+            <div class="app-skeleton-row">
+              @for (c of [1, 2, 3, 4]; track c) {
+                <div class="app-skeleton-block" style="width: 110px"></div>
+              }
+            </div>
+          }
+        </div>
+      } @else if (locationGridError()) {
+        <div class="location-empty-hint location-empty-hint--error">
+          <app-icon name="error_outline" [size]="18" />
+          <span>Couldn't load location combinations for this Site.</span>
+        </div>
+      } @else if (locationRows().length === 0) {
+        <div class="location-empty-hint">
+          <app-icon name="inbox" [size]="18" />
+          <span>No Building / Floor / Wing combinations are available for this Site.</span>
+        </div>
+      } @else {
+        <div class="app-table-scroll location-table-scroll">
+          <table class="w-full border-collapse text-sm location-table">
+            <thead>
+              <tr class="table-head-row">
+                <th class="location-th center-th" style="width: 60px">Select</th>
+                <th class="location-th">Building</th>
+                <th class="location-th">Floor</th>
+                <th class="location-th">Wing</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of locationRows(); track row.wingId) {
+                <tr class="cursor-pointer" (click)="toggleLocationRow(row)">
+                  <td class="px-3 py-2.5 center-td">
+                    <input type="checkbox" [checked]="isLocationRowChecked(row)" (click)="$event.stopPropagation(); toggleLocationRow(row)" aria-label="Select this location" />
+                  </td>
+                  <td class="px-3 py-2.5 text-navy-800 whitespace-nowrap">{{ row.buildingName || '—' }}</td>
+                  <td class="px-3 py-2.5 text-navy-800 whitespace-nowrap">{{ row.floorName || '—' }}</td>
+                  <td class="px-3 py-2.5 text-navy-800 whitespace-nowrap">{{ row.wingName || '—' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+
+    @if (errorMessage()) {
+      <p class="form-error">{{ errorMessage() }}</p>
+    }
+  </div>
+
+  <div class="dialog-footer">
+    <div class="required-hint">
+      <p>* Required fields</p>
+    </div>
+    <div class="dialog-footer-actions">
+      <app-button variant="secondary" icon="cancel" type="button" (click)="onCancelClick()" [disabled]="saving()">Cancel</app-button>
+      <app-button variant="navy" icon="save" type="submit" [loading]="saving()" [disabled]="saving()">{{ isEdit ? 'Update Branch' : 'Save Branch' }}</app-button>
+    </div>
+  </div>
+</form>

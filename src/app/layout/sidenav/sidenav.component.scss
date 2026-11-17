@@ -1,0 +1,34 @@
+// Host-level layout/background/font can't be expressed via Tailwind
+// utility classes in the template (there's no element representing the
+// component's own host tag to put a class="..." on) — this is the one
+// remaining, justified use of plain CSS here. Everything else in this
+// component's own template now uses Tailwind utilities directly, reading
+// color from the shared brand/navy tokens defined once in tailwind.css's
+// own @theme block — this rule uses raw hex rather than var(--color-*),
+// since Tailwind v4 only emits that custom property when an actual utility
+// class uses it (confirmed live this wasn't the case here), and the font
+// stack directly rather than var(--font-sans) for the same reason.
+//
+// Background: a navy gradient blended toward D:\NewOne's own confirmed
+// MenuIconColorLight (#0F3063) — a minor, explicitly-permitted visual
+// refinement layered on this sidebar's own UNCHANGED accordion structure
+// (see sidenav.component.ts's own class comment for why the structure
+// itself was reverted and is now pinned). Wrapped in Tailwind's own "base"
+// layer (see menu-tree-item.component.scss's own comment for the full
+// explanation) so it can never lose a property to a higher-priority
+// "utilities" rule, though nothing here currently conflicts with one.
+@layer base {
+  :host {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: linear-gradient(180deg, #0f2a52 0%, #15345f 100%);
+    font-family:
+      'Inter',
+      ui-sans-serif,
+      system-ui,
+      -apple-system,
+      'Segoe UI',
+      sans-serif;
+  }
+}

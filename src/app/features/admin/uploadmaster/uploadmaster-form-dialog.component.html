@@ -1,0 +1,80 @@
+<div class="dialog-header">
+  <div class="dialog-header-row">
+    <div>
+      <h2 class="dialog-title">{{ dialogTitle }}</h2>
+      <p class="dialog-subtitle">* Required.</p>
+    </div>
+    <app-button variant="secondary" icon="close" [iconOnly]="true" type="button" (click)="onCancelClick()">Close</app-button>
+  </div>
+</div>
+
+<div class="tab-row" role="tablist">
+  <button type="button" role="tab" class="tab-button" [class.tab-button--active]="tab() === 'basic'" (click)="setTab('basic')">Basic</button>
+  <button type="button" role="tab" class="tab-button" [class.tab-button--active]="tab() === 'xml'" (click)="setTab('xml')">XML layout</button>
+</div>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()" (keydown.enter)="onEnterKey($event)">
+  <div class="dialog-content">
+    @if (tab() === 'basic') {
+      <div class="form-content two-col">
+        <app-input class="form-field--full-row" label="Upload name" [required]="true" formControlName="uploadName" [invalid]="!!(form.get('uploadName')?.invalid && form.get('uploadName')?.touched)" errorText="Upload name is required" />
+
+        <div class="procedure-field-row form-field--full-row">
+          <app-combobox
+            class="procedure-combobox"
+            label="Procedure"
+            [required]="true"
+            [options]="procedureOptions()"
+            [loading]="proceduresLoading()"
+            [error]="proceduresError()"
+            formControlName="procedureKey"
+            placeholder="Select a procedure…"
+            noResultsText="No compatible procedures found."
+            [invalid]="!!(form.get('procedureKey')?.invalid && form.get('procedureKey')?.touched)"
+            errorText="Procedure is required"
+          />
+          <app-button variant="muted" icon="refresh" size="sm" [iconOnly]="true" type="button" [loading]="proceduresLoading()" (click)="loadProcedures()" title="Reload procedures">Reload procedures</app-button>
+        </div>
+        <p class="form-help-text form-field--full-row">Only procedures with one XML input and an optional GUID context are listed.</p>
+
+        <app-select label="XML parameter" [options]="xmlParameterOptions()" formControlName="xmlParameterName" placeholder="—" />
+        <app-select label="Context parameter" [options]="contextParameterOptions()" formControlName="contextParameterName" placeholder="—" />
+
+        <app-select label="Context type" [options]="contextTypeOptions()" formControlName="contextType" placeholder="—" />
+      </div>
+    }
+
+    @if (tab() === 'xml') {
+      <div class="form-content two-col xml-layout-panel">
+        <app-input label="Root element" [required]="true" formControlName="xmlRootName" [invalid]="!!(form.get('xmlRootName')?.invalid && form.get('xmlRootName')?.touched)" errorText="Enter a valid XML element name (e.g. Root)." />
+        <app-input label="Row element" [required]="true" formControlName="xmlRowName" [invalid]="!!(form.get('xmlRowName')?.invalid && form.get('xmlRowName')?.touched)" errorText="Enter a valid XML element name (e.g. Row)." />
+
+        <app-textarea
+          class="form-field--full-row"
+          label="Columns, separated by commas"
+          [required]="true"
+          [rows]="5"
+          formControlName="columnsCsv"
+          [invalid]="!!(form.get('columnsCsv')?.invalid && form.get('columnsCsv')?.touched)"
+          errorText="Enter at least one column name."
+        />
+
+        <app-checkbox class="form-field--full-row" formControlName="isRetrySafe">This procedure is safe to retry</app-checkbox>
+
+        <app-textarea class="form-field--full-row" label="Change remarks (optional)" [rows]="4" formControlName="remarks" />
+      </div>
+    }
+
+    @if (errorMessage()) {
+      <p class="form-error">{{ errorMessage() }}</p>
+    }
+  </div>
+
+  <p class="form-help-text footer-help-text">Complete Basic and XML layout, then Save.</p>
+
+  <div class="dialog-footer">
+    <app-button variant="muted" icon="refresh" type="button" [loading]="proceduresLoading()" (click)="loadProcedures()">Reload procedures</app-button>
+    <app-button variant="secondary" icon="cancel" type="button" (click)="onCancelClick()" [disabled]="saving()">Cancel</app-button>
+    <app-button variant="navy" icon="save" type="submit" [loading]="saving()" [disabled]="saving()">Save</app-button>
+  </div>
+</form>

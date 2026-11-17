@@ -1,0 +1,105 @@
+// Shared page-header/footer/code-pill/row--selected/toolbar-row-actions/
+// toolbar-pill-row chrome lives in styles.scss's own classes — see its
+// own comment for why this isn't duplicated per component.
+
+.voter-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--app-space-3);
+  padding: var(--app-space-2) 0 var(--app-space-3);
+}
+
+.voter-filter--xs {
+  width: 110px;
+  flex: none;
+}
+
+.voter-filter--sm {
+  width: 170px;
+  flex: none;
+}
+
+.voter-filter--lg {
+  width: 280px;
+  flex: 1 1 280px;
+  min-width: 220px;
+}
+
+.voter-action-row {
+  margin-bottom: var(--app-space-3);
+}
+
+table tbody tr {
+  &:hover {
+    background: var(--color-navy-50);
+  }
+}
+
+.voter-table {
+  table-layout: fixed;
+}
+
+.voter-table-scroll {
+  max-height: 560px;
+  overflow-y: auto;
+}
+
+.voter-th {
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-navy-500);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  background: var(--mat-sys-surface);
+  z-index: 1;
+}
+
+.center-th,
+.center-td {
+  text-align: center;
+}
+
+.voter-truncate {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.toggle-display {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 34px;
+  height: 19px;
+  border-radius: 999px;
+  background: var(--color-navy-300);
+  transition: background-color 150ms ease;
+
+  &--on {
+    background: var(--color-brand-600);
+  }
+}
+
+.toggle-display-dot {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(20, 26, 43, 0.25);
+  transition: transform 150ms ease;
+
+  .toggle-display--on & {
+    transform: translateX(15px);
+  }
+}

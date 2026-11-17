@@ -1,0 +1,41 @@
+<div class="dialog-header">
+  <div class="dialog-header-row">
+    <div>
+      <h2 class="dialog-title">{{ dialogTitle }}</h2>
+      <p class="dialog-subtitle">* Required. Tamil text is supported.</p>
+    </div>
+    <app-button variant="secondary" icon="close" [iconOnly]="true" type="button" (click)="onCancel()">Close</app-button>
+  </div>
+</div>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()" (keydown.enter)="onEnterKey($event)">
+  <div class="dialog-content">
+    <div class="form-content two-col">
+      <app-input label="Ward no." [required]="true" formControlName="wardNo" [invalid]="!!(form.get('wardNo')?.invalid && form.get('wardNo')?.touched)" errorText="Ward no. is required" />
+      <app-input label="Booth no." [required]="true" formControlName="boothNo" [invalid]="!!(form.get('boothNo')?.invalid && form.get('boothNo')?.touched)" errorText="Booth no. is required" />
+
+      <app-input label="Serial number" type="number" [required]="true" formControlName="serialNumber" [invalid]="!!(form.get('serialNumber')?.invalid && form.get('serialNumber')?.touched)" errorText="Serial number is required" />
+      <app-input label="Voter ID" [required]="true" formControlName="voterId" [invalid]="!!(form.get('voterId')?.invalid && form.get('voterId')?.touched)" errorText="Voter ID is required" />
+
+      <app-input label="Name" [required]="true" formControlName="name" [invalid]="!!(form.get('name')?.invalid && form.get('name')?.touched)" errorText="Name is required" />
+      <app-select label="Relation type" [options]="relationTypeOptions" formControlName="relationType" />
+
+      <app-input label="Relative name (optional)" formControlName="relativeName" />
+      <app-input label="House number (optional)" formControlName="houseNumber" />
+
+      <app-input label="Age (optional)" type="number" formControlName="age" [invalid]="!!(form.get('age')?.invalid && form.get('age')?.touched)" errorText="Age must be between 0 and 150" />
+      <app-select label="Gender" [options]="genderOptions" formControlName="gender" />
+
+      <app-textarea class="form-field--full-row" label="Remarks (optional)" formControlName="remarks" />
+    </div>
+
+    @if (errorMessage()) {
+      <p class="form-error">{{ errorMessage() }}</p>
+    }
+  </div>
+
+  <div class="dialog-footer">
+    <app-button variant="secondary" icon="cancel" type="button" (click)="onCancel()" [disabled]="saving()">Cancel</app-button>
+    <app-button variant="navy" icon="save" type="submit" [loading]="saving()" [disabled]="saving()">Save</app-button>
+  </div>
+</form>

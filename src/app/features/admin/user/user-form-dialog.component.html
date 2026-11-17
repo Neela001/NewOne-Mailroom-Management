@@ -1,0 +1,101 @@
+<div class="dialog-header">
+  <div class="dialog-header-row">
+    <h2 class="dialog-title">{{ dialogTitle }}</h2>
+    <app-button variant="secondary" icon="close" [iconOnly]="true" type="button" (click)="onCancel()">Close</app-button>
+  </div>
+</div>
+
+<div class="tab-row" role="tablist">
+  <button type="button" role="tab" class="tab-button" [class.tab-button--active]="tab() === 'account'" (click)="setTab('account')">Account Details</button>
+  <button type="button" role="tab" class="tab-button" [class.tab-button--active]="tab() === 'roles'" (click)="setTab('roles')">Roles</button>
+  <button type="button" role="tab" class="tab-button" [class.tab-button--active]="tab() === 'desks'" (click)="setTab('desks')">Desks</button>
+</div>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()" (keydown.enter)="onEnterKey($event)">
+  <div class="dialog-content">
+    @if (tab() === 'account') {
+      <div class="form-content two-col">
+        <app-select label="User Type" [required]="true" [options]="userTypeOptions" formControlName="userType" [invalid]="!!(form.get('userType')?.invalid && form.get('userType')?.touched)" errorText="User type is required" />
+        <app-combobox
+          [label]="form.get('userType')?.value === 'VENDORSTAFF' ? 'Linked Vendor Staff' : 'Linked Employee'"
+          [required]="true"
+          [options]="linkedPersonOptions()"
+          [loading]="linkedPersonLoading()"
+          formControlName="linkedPersonId"
+          [invalid]="!!(form.get('linkedPersonId')?.invalid && form.get('linkedPersonId')?.touched)"
+          errorText="A linked person is required"
+        />
+        <app-input label="Username" [required]="true" formControlName="userName" [invalid]="!!(form.get('userName')?.invalid && form.get('userName')?.touched)" errorText="Username is required" />
+        <div class="form-field--full-row"></div>
+        <app-input
+          [label]="isEdit ? 'Password (leave blank to keep current)' : 'Password'"
+          type="password"
+          [revealable]="true"
+          autocomplete="new-password"
+          formControlName="password"
+          [required]="!isEdit"
+          [invalid]="!!(form.get('password')?.invalid && form.get('password')?.touched)"
+          errorText="Password must be at least 8 characters"
+        />
+        <app-input
+          label="Confirm Password"
+          type="password"
+          [revealable]="true"
+          autocomplete="new-password"
+          formControlName="confirmPassword"
+          [invalid]="!!(form.hasError('mismatch') && form.get('confirmPassword')?.touched)"
+          errorText="Passwords do not match"
+        />
+        <app-checkbox class="form-field--full-row" formControlName="forcePasswordChange">Require password change at next login</app-checkbox>
+        <app-textarea class="form-field--full-row" label="Remarks" formControlName="remarks" />
+      </div>
+    }
+
+    @if (tab() === 'roles') {
+      <p class="tab-hint">Select every role this user should have. Permissions for each role are configured separately in Role Rights.</p>
+      @if (rolesLoading()) {
+        <div class="app-skeleton-row"><div class="app-skeleton-block" style="width: 60%"></div></div>
+      } @else if (roleOptions().length === 0) {
+        <p class="empty-hint">No roles found.</p>
+      } @else {
+        <div class="checkbox-list">
+          @for (role of roleOptions(); track role.roleId) {
+            <app-checkbox [ngModel]="selectedRoleIds().has(role.roleId)" [ngModelOptions]="{ standalone: true }" (ngModelChange)="toggleRole(role.roleId)">{{ role.roleName }}</app-checkbox>
+          }
+        </div>
+      }
+    }
+
+    @if (tab() === 'desks') {
+      <p class="tab-hint">Select every desk this user can operate from, and mark one as the default.</p>
+      @if (desksLoading()) {
+        <div class="app-skeleton-row"><div class="app-skeleton-block" style="width: 60%"></div></div>
+      } @else if (deskOptions().length === 0) {
+        <p class="empty-hint">No desks found.</p>
+      } @else {
+        <div class="desk-list">
+          @for (desk of deskOptions(); track desk.deskId) {
+            <div class="desk-row">
+              <app-checkbox [ngModel]="selectedDeskIds().has(desk.deskId)" [ngModelOptions]="{ standalone: true }" (ngModelChange)="toggleDesk(desk.deskId)">
+                {{ desk.deskName }} <span class="desk-meta">({{ desk.deskCode }} — {{ desk.cityName }})</span>
+              </app-checkbox>
+              <label class="default-radio" [class.default-radio--disabled]="!selectedDeskIds().has(desk.deskId)">
+                <input type="radio" name="defaultDesk" [checked]="defaultDeskId() === desk.deskId" [disabled]="!selectedDeskIds().has(desk.deskId)" (change)="setDefaultDesk(desk.deskId)" />
+                Default
+              </label>
+            </div>
+          }
+        </div>
+      }
+    }
+
+    @if (errorMessage()) {
+      <p class="form-error">{{ errorMessage() }}</p>
+    }
+  </div>
+
+  <div class="dialog-footer">
+    <app-button variant="secondary" icon="cancel" type="button" (click)="onCancel()" [disabled]="saving()">Close</app-button>
+    <app-button variant="navy" icon="save" type="submit" [loading]="saving()" [disabled]="saving()">Save</app-button>
+  </div>
+</form>

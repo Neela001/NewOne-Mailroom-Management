@@ -1,0 +1,52 @@
+<div class="dialog-header">
+  <div class="dialog-header-row">
+    <div>
+      <h2 class="dialog-title">Upload History</h2>
+      <p class="dialog-subtitle">{{ data.row.uploadName || 'Upload' }}</p>
+    </div>
+    <app-button variant="secondary" icon="close" [iconOnly]="true" type="button" (click)="dialogRef.close()">Close</app-button>
+  </div>
+</div>
+
+<div class="dialog-content">
+  @if (loading()) {
+    <p class="history-loading">Loading history…</p>
+  } @else if (rows().length === 0) {
+    <p class="history-empty">No history recorded for this upload yet.</p>
+  } @else {
+    <div class="app-table-scroll">
+      <table class="w-full border-collapse text-sm history-table">
+        <thead>
+          <tr class="table-head-row">
+            <th class="history-th">Action date</th>
+            <th class="history-th">Action</th>
+            <th class="history-th">Upload no.</th>
+            <th class="history-th center-th">Total</th>
+            <th class="history-th center-th">Success</th>
+            <th class="history-th center-th">Failed</th>
+            <th class="history-th">Status</th>
+            <th class="history-th">Remarks</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows(); track $index) {
+            <tr>
+              <td class="px-3 py-3 whitespace-nowrap">{{ formatDate(row.actionDate) }}</td>
+              <td class="px-3 py-3 whitespace-nowrap">{{ row.actionType || '—' }}</td>
+              <td class="px-3 py-3 whitespace-nowrap">{{ row.uploadNo ?? '—' }}</td>
+              <td class="px-3 py-3 whitespace-nowrap center-td">{{ row.totalCount ?? '—' }}</td>
+              <td class="px-3 py-3 whitespace-nowrap center-td">{{ row.successCount ?? '—' }}</td>
+              <td class="px-3 py-3 whitespace-nowrap center-td">{{ row.failedCount ?? '—' }}</td>
+              <td class="px-3 py-3 whitespace-nowrap">{{ row.status || '—' }}</td>
+              <td class="px-3 py-3">{{ row.remarks || '—' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+<div class="dialog-footer">
+  <app-button variant="secondary" icon="close" type="button" (click)="dialogRef.close()">Close</app-button>
+</div>

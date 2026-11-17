@@ -1,0 +1,60 @@
+import { MasterEntityConfig } from '../shared/master-entity-config.model';
+
+// Fields from the live spec's EmployeeRequest/EmployeeGetRequest.
+// reportingManagerId is a self-reference (an Employee -> Employee lookup).
+export const EMPLOYEE_CONFIG: MasterEntityConfig = {
+  entityLabel: 'Employee',
+  entityLabelPlural: 'Employees',
+  apiBasePath: 'master/employee',
+  idField: 'employeeId',
+  columns: [
+    { key: 'companyName', label: 'Company', resolveFrom: { apiBasePath: 'master/company', fromField: 'companyId', toField: 'companyId', labelField: 'companyName' } },
+    { key: 'branchName', label: 'Branch', resolveFrom: { apiBasePath: 'master/branch', fromField: 'branchId', toField: 'branchId', labelField: 'branchName' } },
+    { key: 'departmentName', label: 'Department', resolveFrom: { apiBasePath: 'master/department', fromField: 'departmentId', toField: 'departmentId', labelField: 'departmentName' } },
+    { key: 'designationName', label: 'Designation', resolveFrom: { apiBasePath: 'master/designation', fromField: 'designationId', toField: 'designationId', labelField: 'designationName' } },
+    { key: 'employeeCode', label: 'Code' },
+    { key: 'fullName', label: 'Name' },
+    { key: 'emailId', label: 'Email' },
+    { key: 'mobileNo', label: 'Mobile' },
+  ],
+  formFields: [
+    { key: 'companyId', label: 'Company', type: 'select', required: true, optionsSource: { apiBasePath: 'master/company', valueField: 'companyId', labelField: 'companyName' } },
+    { key: 'branchId', label: 'Branch', type: 'select', optionsSource: { apiBasePath: 'master/branch', valueField: 'branchId', labelField: 'branchName' } },
+    { key: 'divisionId', label: 'Division', type: 'select', optionsSource: { apiBasePath: 'master/division', valueField: 'divisionId', labelField: 'divisionName' } },
+    { key: 'departmentId', label: 'Department', type: 'select', optionsSource: { apiBasePath: 'master/department', valueField: 'departmentId', labelField: 'departmentName' } },
+    { key: 'costCenterId', label: 'Cost Center', type: 'select', optionsSource: { apiBasePath: 'master/costcenter', valueField: 'costCenterId', labelField: 'costCenterName' } },
+    { key: 'designationId', label: 'Designation', type: 'select', optionsSource: { apiBasePath: 'master/designation', valueField: 'designationId', labelField: 'designationName' } },
+    { key: 'employeeCode', label: 'Employee Code', type: 'text', required: true },
+    { key: 'fullName', label: 'Full Name', type: 'text', required: true },
+    {
+      key: 'gender',
+      label: 'Gender',
+      type: 'select',
+      options: [
+        { label: 'Male', value: 'Male' },
+        { label: 'Female', value: 'Female' },
+        { label: 'Other', value: 'Other' },
+      ],
+    },
+    { key: 'cabinName', label: 'Cabin Name', type: 'text' },
+    { key: 'emailId', label: 'Email', type: 'text' },
+    { key: 'mobileNo', label: 'Mobile No', type: 'text' },
+    { key: 'dateOfJoining', label: 'Date of Joining', type: 'date' },
+    { key: 'reportingManagerId', label: 'Reporting Manager', type: 'select', optionsSource: { apiBasePath: 'master/employee', valueField: 'employeeId', labelField: 'fullName' } },
+    { key: 'secretaryFlag', label: 'Secretary', type: 'boolean' },
+    { key: 'remarks', label: 'Remarks', type: 'textarea', fullRow: true },
+  ],
+  historyColumns: [
+    { key: 'actionDate', label: 'Action Date' },
+    { key: 'actionType', label: 'Action Type' },
+    { key: 'actionBy', label: 'Action By' },
+    { key: 'companyName', label: 'Company', resolveFrom: { apiBasePath: 'master/company', fromField: 'companyId', toField: 'companyId', labelField: 'companyName' } },
+    { key: 'departmentName', label: 'Department', resolveFrom: { apiBasePath: 'master/department', fromField: 'departmentId', toField: 'departmentId', labelField: 'departmentName' } },
+    { key: 'employeeCode', label: 'Code' },
+    { key: 'fullName', label: 'Name' },
+    { key: 'isActive', label: 'Active' },
+  ],
+  buildDeleteRequest: (row) => ({ employeeId: row['employeeId'] }),
+  buildListRequest: (searchText) => ({ searchText: searchText || null, isActive: null }),
+  buildHistoryRequest: (row) => ({ employeeId: row['employeeId'] }),
+};

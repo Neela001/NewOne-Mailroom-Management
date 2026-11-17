@@ -1,0 +1,102 @@
+<div class="app-page-card skyline-card">
+  <div class="page-header-row">
+    <div class="page-header-left">
+      <span class="page-icon-badge"><app-icon [name]="headerIcon()" [size]="26" /></span>
+      <div>
+        <h2 class="app-page-title">User Audit</h2>
+        <p class="app-page-subtitle">Read-only API activity log</p>
+      </div>
+    </div>
+  </div>
+
+  @if (menuService.hasLoaded() && !rights().canView) {
+    <app-empty-state class="access-denied-row" icon="lock" message="You don't have permission to view the audit log." />
+  } @else {
+    <div class="filter-grid">
+      <app-select label="Events" [options]="eventsOptions" [ngModel]="events()" (ngModelChange)="events.set($event)" [ngModelOptions]="{ standalone: true }" />
+      <app-input label="User ID (optional)" placeholder="Specific user's GUID" [ngModel]="userIdFilter()" (ngModelChange)="userIdFilter.set($event)" [ngModelOptions]="{ standalone: true }" />
+      <app-input label="Username contains" [ngModel]="userNameFilter()" (ngModelChange)="userNameFilter.set($event)" [ngModelOptions]="{ standalone: true }" />
+      <app-input label="Action type (exact)" [ngModel]="actionTypeFilter()" (ngModelChange)="actionTypeFilter.set($event)" [ngModelOptions]="{ standalone: true }" />
+
+      <app-select label="Result" [options]="resultOptions" [ngModel]="apiStatusFilter()" (ngModelChange)="apiStatusFilter.set($event)" [ngModelOptions]="{ standalone: true }" />
+      <div class="date-field" [class.date-field--disabled]="!fromDateEnabled()">
+        <app-input label="From date (UTC, optional)" type="date" [ngModel]="fromDateValue()" (ngModelChange)="fromDateValue.set($event)" [ngModelOptions]="{ standalone: true }" />
+        <app-checkbox [ngModel]="fromDateEnabled()" (ngModelChange)="fromDateEnabled.set($event)" [ngModelOptions]="{ standalone: true }">Enable</app-checkbox>
+      </div>
+      <div class="date-field" [class.date-field--disabled]="!toDateEnabled()">
+        <app-input label="To date (UTC, optional)" type="date" [ngModel]="toDateValue()" (ngModelChange)="toDateValue.set($event)" [ngModelOptions]="{ standalone: true }" />
+        <app-checkbox [ngModel]="toDateEnabled()" (ngModelChange)="toDateEnabled.set($event)" [ngModelOptions]="{ standalone: true }">Enable</app-checkbox>
+      </div>
+      <app-input label="Events per page" type="number" [ngModel]="pageSizeInput()" (ngModelChange)="pageSizeInput.set($event)" [ngModelOptions]="{ standalone: true }" />
+    </div>
+
+    <p class="filter-info">All-user search requires an active ADMIN role. Dates include the entire UTC day. Search applies changed filters; paging keeps the last loaded search.</p>
+
+    <div class="toolbar-pill-row audit-toolbar">
+      <app-button variant="primary" icon="search" [disabled]="loading()" (click)="search()">Search</app-button>
+      <app-button variant="muted" icon="refresh" [disabled]="loading()" (click)="refresh()">Refresh</app-button>
+      <app-button variant="secondary" icon="chevron_left" [disabled]="loading() || !canGoPrevious()" (click)="previous()">Previous</app-button>
+      <app-button variant="secondary" icon="chevron_right" [disabled]="loading() || !canGoNext()" (click)="next()">Next</app-button>
+      <span class="scope-info">{{ scopeLabel() }} | Page {{ pageNumber() }} | {{ rows().length }} shown</span>
+    </div>
+
+    @if (errorMessage()) {
+      <p class="audit-error">{{ errorMessage() }}</p>
+    }
+
+    @if (loading()) {
+      <div class="app-table-scroll">
+        @for (i of skeletonRows; track i) {
+          <div class="app-skeleton-row">
+            @for (c of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]; track c) {
+              <div class="app-skeleton-block" style="width: 90px"></div>
+            }
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="app-table-scroll">
+        <table class="w-full border-collapse text-sm audit-table">
+          <thead>
+            <tr class="table-head-row">
+              <th class="audit-th" style="width: 170px">Occurred (UTC)</th>
+              <th class="audit-th" style="width: 125px">Username</th>
+              <th class="audit-th" style="width: 170px">Action</th>
+              <th class="audit-th" style="width: 100px">Result</th>
+              <th class="audit-th" style="width: 105px">HTTP Status</th>
+              <th class="audit-th" style="width: 75px">Method</th>
+              <th class="audit-th" style="width: 260px">Request Path</th>
+              <th class="audit-th" style="width: 110px">Duration (ms)</th>
+              <th class="audit-th" style="width: 130px">IP Address</th>
+              <th class="audit-th" style="width: 140px">Reference</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of rows(); track row.auditId) {
+              <tr>
+                <td class="px-3 py-2.5 text-navy-800 whitespace-nowrap">{{ formatOccurred(row.occurredAtUtc) }}</td>
+                <td class="px-3 py-2.5 text-navy-800 whitespace-nowrap">{{ row.userName || '—' }}</td>
+                <td class="px-3 py-2.5 text-navy-800 whitespace-nowrap">{{ row.actionType || '—' }}</td>
+                <td class="px-3 py-2.5 whitespace-nowrap">
+                  <span class="app-status-chip" [class.app-status-chip--success]="row.apiStatus === 'SUCCESS'" [class.app-status-chip--error]="row.apiStatus !== 'SUCCESS'">
+                    {{ row.apiStatus }}
+                  </span>
+                </td>
+                <td class="px-3 py-2.5 text-navy-800 whitespace-nowrap">{{ row.statusCode }}</td>
+                <td class="px-3 py-2.5 text-navy-800 whitespace-nowrap">{{ row.httpMethod }}</td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><span class="audit-truncate path-cell" [title]="row.requestPath || ''">{{ row.requestPath || '—' }}</span></td>
+                <td class="px-3 py-2.5 text-navy-800 whitespace-nowrap">{{ row.durationMs }}</td>
+                <td class="px-3 py-2.5 text-navy-800 whitespace-nowrap">{{ row.ipAddress || '—' }}</td>
+                <td class="px-3 py-2.5 whitespace-nowrap"><span class="audit-truncate path-cell" [title]="row.traceId || ''">{{ row.traceId || '—' }}</span></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        @if (rows().length === 0) {
+          <app-empty-state icon="inbox" message="No audit events found." />
+        }
+      </div>
+    }
+  }
+</div>

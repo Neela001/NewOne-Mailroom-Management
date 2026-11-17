@@ -1,0 +1,104 @@
+<div class="dialog-header">
+  <div class="dialog-header-row">
+    <div>
+      <h2 class="dialog-title">{{ isEdit ? 'Edit Wing' : 'Add Wing' }}</h2>
+      <p class="dialog-subtitle">Select Site, Building and Floor, then enter the Wing details.</p>
+    </div>
+    <app-button variant="secondary" icon="close" [iconOnly]="true" type="button" (click)="onCancelClick()">Close</app-button>
+  </div>
+</div>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()" (keydown.enter)="onEnterKey($event)">
+  <div class="dialog-content">
+    <div class="wing-form-panel">
+      <div class="form-row">
+        <app-combobox
+          class="col-full"
+          label="Site"
+          [required]="true"
+          [options]="siteOptions()"
+          [loading]="sitesLoading()"
+          [error]="sitesError()"
+          formControlName="siteId"
+          placeholder="Select a site…"
+          noResultsText="No active sites found."
+          [invalid]="!!(form.get('siteId')?.invalid && form.get('siteId')?.touched)"
+          errorText="Site is required"
+        />
+      </div>
+
+      <div class="form-row">
+        <app-combobox
+          class="col-full"
+          label="Building"
+          [required]="true"
+          [options]="buildingOptions()"
+          [loading]="buildingsLoading()"
+          [error]="buildingsError()"
+          formControlName="buildingId"
+          placeholder="Select a building…"
+          noResultsText="No active buildings found for this site."
+          [invalid]="!!(form.get('buildingId')?.invalid && form.get('buildingId')?.touched)"
+          errorText="Building is required"
+        />
+      </div>
+
+      <div class="form-row">
+        <app-combobox
+          class="col-full"
+          label="Floor"
+          [required]="true"
+          [options]="floorOptions()"
+          [loading]="floorsLoading()"
+          [error]="floorsError()"
+          formControlName="floorId"
+          placeholder="Select a floor…"
+          noResultsText="No active floors found for this building."
+          [invalid]="!!(form.get('floorId')?.invalid && form.get('floorId')?.touched)"
+          errorText="Floor is required"
+        />
+      </div>
+
+      <div class="form-row">
+        <app-input
+          class="col-full"
+          label="Wing Code"
+          [required]="true"
+          formControlName="wingCode"
+          [invalid]="!!(form.get('wingCode')?.invalid && form.get('wingCode')?.touched)"
+          errorText="Wing Code is required"
+        />
+      </div>
+
+      <div class="form-row">
+        <app-input
+          class="col-full"
+          label="Wing Name"
+          [required]="true"
+          formControlName="wingName"
+          [invalid]="!!(form.get('wingName')?.invalid && form.get('wingName')?.touched)"
+          errorText="Wing Name is required"
+        />
+      </div>
+
+      <div class="form-row">
+        <app-textarea class="col-full" label="Remarks" formControlName="remarks" />
+      </div>
+    </div>
+
+    @if (errorMessage()) {
+      <p class="form-error">{{ errorMessage() }}</p>
+    }
+  </div>
+
+  <div class="dialog-footer">
+    <div class="required-hint">
+      <p>* Required fields</p>
+      <p>{{ helperText() }}</p>
+    </div>
+    <div class="dialog-footer-actions">
+      <app-button variant="secondary" icon="cancel" type="button" (click)="onCancelClick()" [disabled]="saving()">Cancel</app-button>
+      <app-button variant="navy" icon="save" type="submit" [loading]="saving()" [disabled]="saving()">{{ isEdit ? 'Update Wing' : 'Save Wing' }}</app-button>
+    </div>
+  </div>
+</form>

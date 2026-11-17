@@ -1,0 +1,65 @@
+<div class="dialog-header">
+  <div class="dialog-header-row">
+    <div>
+      <h2 class="dialog-title">{{ isEdit ? 'Edit City' : 'Add City' }}</h2>
+      <p class="dialog-subtitle">Select the location and fill the required fields, then save the city.</p>
+    </div>
+    <app-button variant="secondary" icon="close" [iconOnly]="true" type="button" (click)="onCancelClick()">Close</app-button>
+  </div>
+</div>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()" (keydown.enter)="onEnterKey($event)">
+  <div class="dialog-content">
+    <div class="city-form-panel">
+      <div class="form-row">
+        <app-combobox
+          class="col-half"
+          label="Country"
+          [required]="true"
+          [options]="countryOptions()"
+          [loading]="countriesLoading()"
+          [error]="countriesError()"
+          formControlName="countryId"
+          placeholder="Select a country…"
+          noResultsText="No active countries configured for Cities."
+          [invalid]="!!(form.get('countryId')?.invalid && form.get('countryId')?.touched)"
+          errorText="Country is required"
+        />
+        <app-combobox
+          class="col-half"
+          [label]="stateLabel()"
+          [options]="stateOptions()"
+          [loading]="statesLoading()"
+          [error]="statesError()"
+          formControlName="stateId"
+          [placeholder]="stateApplicable() ? 'Select a state…' : 'Not applicable'"
+          noResultsText="No active states found for this country."
+        />
+      </div>
+
+      <div class="form-row">
+        <app-input class="col-half" label="City Code" formControlName="cityCode" />
+        <app-input class="col-half" label="City Name" [required]="true" formControlName="cityName" [invalid]="!!(form.get('cityName')?.invalid && form.get('cityName')?.touched)" errorText="City Name is required" />
+      </div>
+
+      <div class="form-row">
+        <app-textarea class="col-full" label="Remarks" formControlName="remarks" />
+      </div>
+    </div>
+
+    @if (errorMessage()) {
+      <p class="form-error">{{ errorMessage() }}</p>
+    }
+  </div>
+
+  <div class="dialog-footer">
+    <div class="required-hint">
+      <p>* Required fields</p>
+      <p>Select an active Country supporting Cities.</p>
+    </div>
+    <div class="dialog-footer-actions">
+      <app-button variant="secondary" icon="cancel" type="button" (click)="onCancelClick()" [disabled]="saving()">Cancel</app-button>
+      <app-button variant="navy" icon="save" type="submit" [loading]="saving()" [disabled]="saving()">Save City</app-button>
+    </div>
+  </div>
+</form>

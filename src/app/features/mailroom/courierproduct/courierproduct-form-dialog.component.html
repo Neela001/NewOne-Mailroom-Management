@@ -1,0 +1,120 @@
+<div class="dialog-header">
+  <div class="dialog-header-row">
+    <div>
+      <h2 class="dialog-title">{{ isEdit ? 'Edit Courier Product' : 'Add Courier Product' }}</h2>
+      <p class="dialog-subtitle">Select Courier Mode and Vendor to load the supported Service Type.</p>
+    </div>
+    <app-button variant="secondary" icon="close" [iconOnly]="true" type="button" (click)="onCancelClick()">Close</app-button>
+  </div>
+</div>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()" (keydown.enter)="onEnterKey($event)">
+  <div class="dialog-content">
+    <div class="courierproduct-form-panel">
+      <div class="form-row">
+        <app-input
+          class="col-half"
+          label="Code"
+          [required]="true"
+          formControlName="code"
+          [invalid]="!!(form.get('code')?.invalid && form.get('code')?.touched)"
+          errorText="Code is required"
+        />
+        <app-input
+          class="col-half"
+          label="Name"
+          [required]="true"
+          formControlName="name"
+          [invalid]="!!(form.get('name')?.invalid && form.get('name')?.touched)"
+          errorText="Name is required"
+        />
+      </div>
+
+      <div class="form-row">
+        <app-combobox
+          class="col-half"
+          label="Courier Mode"
+          [required]="true"
+          [options]="modeOptions()"
+          [loading]="optionsLoading()"
+          [error]="optionsError()"
+          formControlName="courierModeId"
+          placeholder="Select a courier mode…"
+          noResultsText="No active courier modes found."
+          [invalid]="!!(form.get('courierModeId')?.invalid && form.get('courierModeId')?.touched)"
+          errorText="Courier Mode is required"
+        />
+        <app-combobox
+          class="col-half"
+          label="Courier Vendor"
+          [required]="true"
+          [options]="vendorOptions()"
+          [loading]="optionsLoading()"
+          formControlName="courierVendorId"
+          placeholder="Select a courier mode first…"
+          noResultsText="No active vendors for this courier mode."
+          [invalid]="!!(form.get('courierVendorId')?.invalid && form.get('courierVendorId')?.touched)"
+          errorText="Courier Vendor is required"
+        />
+      </div>
+
+      <div class="form-row">
+        <app-combobox
+          class="col-half"
+          label="Product Group"
+          [required]="true"
+          [options]="productGroupOptions()"
+          [loading]="optionsLoading()"
+          formControlName="courierProductGroupId"
+          placeholder="Select a product group…"
+          noResultsText="No active product groups found."
+          [invalid]="!!(form.get('courierProductGroupId')?.invalid && form.get('courierProductGroupId')?.touched)"
+          errorText="Product Group is required"
+        />
+        <app-select
+          class="col-half"
+          label="Service Type"
+          [required]="true"
+          [options]="serviceTypeOptions()"
+          formControlName="serviceType"
+          placeholder="Select a vendor first…"
+          [invalid]="!!(form.get('serviceType')?.invalid && form.get('serviceType')?.touched)"
+          errorText="Service Type is required"
+        />
+      </div>
+
+      <div class="form-row">
+        <app-input
+          class="col-half"
+          label="Volumetric Divisor"
+          [required]="true"
+          formControlName="volumetricDivisor"
+          placeholder="e.g. 5000"
+          [invalid]="!!(form.get('volumetricDivisor')?.invalid && form.get('volumetricDivisor')?.touched)"
+          errorText="Must be a whole number from 0 to 99999999999999"
+        />
+        <p class="col-half dependency-guidance">Courier Vendor options depend on the selected Courier Mode. Service Type is derived from the selected Vendor and cannot be chosen independently.</p>
+      </div>
+
+      <div class="form-row">
+        <app-textarea class="col-full" label="Change remarks" formControlName="remarks" />
+      </div>
+    </div>
+
+    @if (errorMessage()) {
+      <p class="form-error">{{ errorMessage() }}</p>
+    }
+  </div>
+
+  <div class="dialog-footer">
+    <div class="required-hint">
+      <p>* Required fields</p>
+      <p>{{ helperText() }}</p>
+    </div>
+    <div class="dialog-footer-actions">
+      <app-button variant="muted" icon="refresh" type="button" [disabled]="optionsLoading() || saving()" (click)="reloadData()">Reload options</app-button>
+      <app-button variant="secondary" icon="cancel" type="button" (click)="onCancelClick()" [disabled]="saving()">Cancel</app-button>
+      <app-button variant="navy" icon="save" type="submit" [loading]="saving()" [disabled]="saving() || form.invalid">{{ isEdit ? 'Update' : 'Save' }}</app-button>
+    </div>
+  </div>
+</form>

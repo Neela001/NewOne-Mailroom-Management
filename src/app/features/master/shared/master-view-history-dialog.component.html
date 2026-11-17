@@ -1,0 +1,68 @@
+<h2 class="app-dialog-title">View {{ data.config.entityLabel }}</h2>
+
+<div class="dialog-content">
+  <p class="m-0 mb-4 text-[13px] text-navy-500">View {{ data.config.entityLabel.toLowerCase() }} details and changes recorded in the history log.</p>
+
+  <div class="tab-row" role="tablist">
+    <button type="button" role="tab" class="tab-button" [class.tab-button--active]="tab() === 'view'" [attr.aria-selected]="tab() === 'view'" (click)="setTab('view')">View Data</button>
+    <button type="button" role="tab" class="tab-button" [class.tab-button--active]="tab() === 'history'" [attr.aria-selected]="tab() === 'history'" (click)="setTab('history')">History Data</button>
+  </div>
+
+  @if (tab() === 'view') {
+    @if (viewLoading()) {
+      <div class="view-loading">
+        @for (i of [1, 2, 3, 4]; track i) {
+          <div class="app-skeleton-row">
+            <div class="app-skeleton-block" style="width: 30%"></div>
+            <div class="app-skeleton-block" style="width: 50%"></div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="app-detail-grid">
+        @for (item of viewItems(); track item.label) {
+          <div>
+            <span class="app-detail-label">{{ item.label }}</span>
+            <span class="view-detail-value" [class.view-detail-value--empty]="item.isEmpty">{{ item.value }}</span>
+          </div>
+        }
+      </div>
+    }
+  } @else {
+    @if (historyLoading()) {
+      <div class="history-loading">
+        <span class="h-7 w-7 animate-spin rounded-full border-2 border-navy-200 border-t-brand-600"></span>
+      </div>
+    } @else if (historyRows().length === 0) {
+      <p class="history-empty">No history found for this record.</p>
+    } @else {
+      <div class="history-table-scroll">
+        <table class="w-full border-collapse text-sm">
+          <thead>
+            <tr class="border-b border-navy-200">
+              @for (col of data.config.historyColumns; track col.key) {
+                <th class="px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide text-navy-500 whitespace-nowrap">
+                  {{ col.label }}
+                </th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of historyRows(); track $index) {
+              <tr class="border-b border-navy-100 last:border-0 hover:bg-navy-50">
+                @for (col of data.config.historyColumns; track col.key) {
+                  <td class="px-3 py-2.5 text-navy-800 whitespace-nowrap">{{ resolveHistoryCell(row, col) }}</td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="history-count">{{ historyRows().length }} history record(s)</p>
+    }
+  }
+</div>
+
+<div class="app-dialog-actions">
+  <app-button variant="muted" (click)="dialogRef.close()">Close</app-button>
+</div>

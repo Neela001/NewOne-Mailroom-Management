@@ -1,0 +1,59 @@
+<div class="dialog-header">
+  <div class="dialog-header-row">
+    <div>
+      <h2 class="dialog-title">{{ dialogTitle }}</h2>
+      <p class="dialog-subtitle">Enter mailbox and SMTP details. Only email name and address are required.</p>
+    </div>
+    <app-button variant="secondary" icon="close" [iconOnly]="true" type="button" (click)="onCancel()">Close</app-button>
+  </div>
+</div>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()" (keydown.enter)="onEnterKey($event)">
+  <div class="dialog-content">
+    <div class="form-content two-col">
+      <app-input label="Email Name" [required]="true" formControlName="emailName" [invalid]="!!(form.get('emailName')?.invalid && form.get('emailName')?.touched)" errorText="Email name is required" />
+      <app-input
+        label="Email Address"
+        type="email"
+        [required]="true"
+        formControlName="emailAddress"
+        [invalid]="!!(form.get('emailAddress')?.invalid && form.get('emailAddress')?.touched)"
+        [errorText]="form.get('emailAddress')?.hasError('email') ? 'Enter a valid email address' : 'Email address is required'"
+      />
+
+      <app-input label="SMTP Server (optional)" formControlName="smtpServer" />
+      <app-input label="Port (optional)" type="number" formControlName="port" />
+
+      <app-select label="Authentication" [options]="authOptions()" formControlName="authFlag" />
+      <app-select label="Connection Encryption" [options]="encryptionOptions()" formControlName="encrptMethod" />
+
+      <app-input label="User Name (optional)" formControlName="userName" />
+      <app-input label="Password (optional)" type="password" [revealable]="true" autocomplete="new-password" formControlName="password" />
+
+      <app-input label="Target Name (optional)" formControlName="targetName" />
+      @if (hadPassword) {
+        <app-checkbox class="remove-password-field" [ngModel]="removePassword()" (ngModelChange)="removePassword.set($event)" [ngModelOptions]="{ standalone: true }">Remove saved password</app-checkbox>
+      }
+
+      <p class="password-hint form-field--full-row">{{ passwordHint }}</p>
+      @if (authEncryptionSummary(); as summary) {
+        <p class="auth-summary form-field--full-row">{{ summary }}</p>
+      }
+
+      <app-textarea class="form-field--full-row" label="Remarks (optional)" formControlName="remarks" />
+    </div>
+
+    @if (optionsError()) {
+      <p class="options-error">Couldn't load SMTP options. <button type="button" class="link-button" (click)="reloadOptions()">Try again</button></p>
+    }
+    @if (errorMessage()) {
+      <p class="form-error">{{ errorMessage() }}</p>
+    }
+  </div>
+
+  <div class="dialog-footer">
+    <app-button variant="secondary" icon="refresh" type="button" [loading]="loadingOptions()" [disabled]="loadingOptions()" (click)="reloadOptions()">Reload SMTP Options</app-button>
+    <app-button variant="secondary" icon="cancel" type="button" (click)="onCancel()" [disabled]="saving()">Cancel</app-button>
+    <app-button variant="navy" icon="save" type="submit" [loading]="saving()" [disabled]="saving()">Save Email Setting</app-button>
+  </div>
+</form>

@@ -1,0 +1,91 @@
+<div class="dialog-header">
+  <div class="dialog-header-row">
+    <div>
+      <h2 class="dialog-title">{{ isEdit ? 'Edit Designation' : 'Add Designation' }}</h2>
+      <p class="dialog-subtitle">Select Company, then enter the Designation details.</p>
+    </div>
+    <app-button variant="secondary" icon="close" [iconOnly]="true" type="button" (click)="onCancelClick()">Close</app-button>
+  </div>
+</div>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()" (keydown.enter)="onEnterKey($event)">
+  <div class="dialog-content">
+    <div class="designation-form-panel">
+      <div class="form-row">
+        <app-combobox
+          class="col-full"
+          label="Company"
+          [required]="true"
+          [options]="companyOptions()"
+          [loading]="companiesLoading()"
+          [error]="companiesError()"
+          formControlName="companyId"
+          placeholder="Select a company…"
+          noResultsText="No active companies found."
+          [invalid]="!!(form.get('companyId')?.invalid && form.get('companyId')?.touched)"
+          errorText="Company is required"
+        />
+      </div>
+
+      <div class="form-row">
+        <app-input
+          class="col-half"
+          label="Designation Code"
+          [required]="true"
+          formControlName="designationCode"
+          [invalid]="!!(form.get('designationCode')?.invalid && form.get('designationCode')?.touched)"
+          errorText="Designation Code is required"
+        />
+        <app-input
+          class="col-half"
+          label="Designation Name"
+          [required]="true"
+          formControlName="designationName"
+          [invalid]="!!(form.get('designationName')?.invalid && form.get('designationName')?.touched)"
+          errorText="Designation Name is required"
+        />
+      </div>
+
+      <div class="form-row designation-level-row">
+        <app-input
+          class="col-half"
+          label="Designation Level"
+          type="number"
+          placeholder="e.g. -1, 0, 1, 5"
+          formControlName="designationLevel"
+          [invalid]="!!(form.get('designationLevel')?.invalid && form.get('designationLevel')?.touched)"
+          errorText="Enter a whole number (no decimals)"
+        />
+        <div class="col-half specify-level-field">
+          <app-checkbox formControlName="specifyLevel">Specify level</app-checkbox>
+          <p class="specify-level-hint">
+            @if (specifyLevelChecked()) {
+              This Designation's Level will be saved as entered.
+            } @else {
+              No Level will be saved for this Designation.
+            }
+          </p>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <app-textarea class="col-full" label="Remarks" formControlName="remarks" />
+      </div>
+    </div>
+
+    @if (errorMessage()) {
+      <p class="form-error">{{ errorMessage() }}</p>
+    }
+  </div>
+
+  <div class="dialog-footer">
+    <div class="required-hint">
+      <p>* Required fields</p>
+      <p>{{ helperText() }}</p>
+    </div>
+    <div class="dialog-footer-actions">
+      <app-button variant="secondary" icon="cancel" type="button" (click)="onCancelClick()" [disabled]="saving()">Cancel</app-button>
+      <app-button variant="navy" icon="save" type="submit" [loading]="saving()" [disabled]="saving()">{{ isEdit ? 'Update Designation' : 'Save Designation' }}</app-button>
+    </div>
+  </div>
+</form>

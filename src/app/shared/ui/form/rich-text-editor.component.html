@@ -1,0 +1,91 @@
+<div class="rte">
+  @if (label()) {
+    <label [for]="id" class="rte-label">
+      {{ label() }}
+      @if (required()) {
+        <span class="text-error-fg">*</span>
+      }
+    </label>
+  }
+
+  <div class="rte-surface" [class.rte-surface--invalid]="invalid()">
+    <div class="rte-toolbar" role="toolbar" aria-label="Formatting">
+      <button type="button" class="rte-toolbar-btn" [class.rte-toolbar-btn--active]="activeStates().bold" [disabled]="disabled()" (mousedown)="preventToolbarBlur($event)" (click)="toggleBold()" title="Bold" aria-label="Bold">
+        <app-icon name="format_bold" [size]="15" />
+      </button>
+      <button type="button" class="rte-toolbar-btn" [class.rte-toolbar-btn--active]="activeStates().italic" [disabled]="disabled()" (mousedown)="preventToolbarBlur($event)" (click)="toggleItalic()" title="Italic" aria-label="Italic">
+        <app-icon name="format_italic" [size]="15" />
+      </button>
+      <button type="button" class="rte-toolbar-btn" [class.rte-toolbar-btn--active]="activeStates().underline" [disabled]="disabled()" (mousedown)="preventToolbarBlur($event)" (click)="toggleUnderline()" title="Underline" aria-label="Underline">
+        <app-icon name="format_underline" [size]="15" />
+      </button>
+      <span class="rte-toolbar-divider" aria-hidden="true"></span>
+      <button type="button" class="rte-toolbar-btn" [disabled]="disabled()" (mousedown)="preventToolbarBlur($event)" (click)="applyParagraph()" title="Paragraph" aria-label="Paragraph">
+        <app-icon name="paragraph" [size]="15" />
+      </button>
+      <button type="button" class="rte-toolbar-btn" [class.rte-toolbar-btn--active]="activeStates().insertUnorderedList" [disabled]="disabled()" (mousedown)="preventToolbarBlur($event)" (click)="toggleBulletList()" title="Bulleted list" aria-label="Bulleted list">
+        <app-icon name="format_list_bulleted" [size]="15" />
+      </button>
+      <button type="button" class="rte-toolbar-btn" [class.rte-toolbar-btn--active]="activeStates().insertOrderedList" [disabled]="disabled()" (mousedown)="preventToolbarBlur($event)" (click)="toggleNumberedList()" title="Numbered list" aria-label="Numbered list">
+        <app-icon name="format_list_numbered" [size]="15" />
+      </button>
+      <span class="rte-toolbar-divider" aria-hidden="true"></span>
+      <div class="rte-link-anchor">
+        <button type="button" class="rte-toolbar-btn" [disabled]="disabled()" (mousedown)="preventToolbarBlur($event)" (click)="openLinkPopover()" title="Insert link" aria-label="Insert link">
+          <app-icon name="link" [size]="15" />
+        </button>
+        @if (linkPopoverOpen()) {
+          <div class="rte-link-popover">
+            <input #linkInputEl type="text" class="rte-link-input" placeholder="https://example.com" [value]="linkUrl()" (input)="linkUrl.set($any($event.target).value)" (keydown.enter)="confirmLink()" (keydown.escape)="closeLinkPopover()" />
+            @if (linkError()) {
+              <p class="rte-link-error">{{ linkError() }}</p>
+            }
+            <div class="rte-link-actions">
+              <button type="button" class="rte-link-cancel" (click)="closeLinkPopover()">Cancel</button>
+              <button type="button" class="rte-link-confirm" (click)="confirmLink()">Insert</button>
+            </div>
+          </div>
+        }
+      </div>
+      <button type="button" class="rte-toolbar-btn" [disabled]="disabled()" (mousedown)="preventToolbarBlur($event)" (click)="insertLineBreak()" title="Line break" aria-label="Line break">
+        <app-icon name="line_break" [size]="15" />
+      </button>
+
+      <span class="rte-toolbar-spacer"></span>
+      <div class="rte-tab-row" role="tablist">
+        <button type="button" role="tab" class="rte-tab-btn" [class.rte-tab-btn--active]="tab() === 'html'" (click)="setTab('html')">HTML</button>
+        <button type="button" role="tab" class="rte-tab-btn" [class.rte-tab-btn--active]="tab() === 'preview'" (click)="setTab('preview')">Preview</button>
+      </div>
+    </div>
+
+    <div class="rte-body" [class.rte-body--hidden]="tab() !== 'html'">
+      <div
+        #editorEl
+        class="rte-editor"
+        [id]="id"
+        contenteditable="true"
+        [attr.data-placeholder]="placeholder()"
+        [class.rte-editor--empty]="isEmpty()"
+        (input)="onEditorInput()"
+        (focus)="onEditorFocus()"
+        (blur)="onEditorBlur()"
+        (keyup)="onEditorKeyup()"
+        (mouseup)="onEditorMouseup()"
+        (paste)="onEditorPaste($event)"
+      ></div>
+    </div>
+    @if (tab() === 'preview') {
+      <div class="rte-body">
+        @if (isEmpty()) {
+          <p class="rte-preview-empty">Nothing to preview yet.</p>
+        } @else {
+          <div class="rte-preview" [innerHTML]="previewHtml()"></div>
+        }
+      </div>
+    }
+  </div>
+
+  @if (invalid() && errorText()) {
+    <p class="text-xs text-error-fg">{{ errorText() }}</p>
+  }
+</div>

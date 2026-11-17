@@ -1,0 +1,216 @@
+// Same CDK-overlay-pane-is-flex fix as master-form-dialog.component.scss's
+// own :host rule — see that file's own comment for the measured evidence.
+:host {
+  display: block;
+  width: 100%;
+}
+
+.dialog-header {
+  padding: var(--app-space-5) var(--app-space-5) 0;
+}
+
+.dialog-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--app-space-3);
+}
+
+.dialog-title {
+  margin: 0;
+  font: var(--mat-sys-title-large);
+  color: var(--mat-sys-on-surface);
+}
+
+.dialog-subtitle {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--color-navy-500);
+}
+
+// The entire form AND the Branch Location Selection grid live in this
+// one scrollable area, inside the SAME popup — this task's own explicit
+// "Keep the entire form and location grid in one popup. Use vertical
+// scrolling..." instruction.
+.dialog-content {
+  min-width: 760px;
+  max-width: 92vw;
+  max-height: 72vh;
+  overflow-y: auto;
+  padding: var(--app-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-space-5);
+
+  @media (max-width: 899.98px) {
+    min-width: 0;
+  }
+}
+
+// A clean bordered panel for the whole form, matching the Windows
+// reference screenshot (same treatment as every other location Master's
+// own Add/Edit popups this session).
+.branch-form-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-space-4);
+  border: 1px solid var(--color-navy-200);
+  border-radius: 12px;
+  padding: var(--app-space-4);
+  background: #ffffff;
+}
+
+.form-row {
+  display: flex;
+  gap: var(--app-space-4);
+  align-items: flex-start;
+
+  @media (max-width: 599.98px) {
+    flex-direction: column;
+  }
+}
+
+.form-row--three {
+  @media (max-width: 799.98px) and (min-width: 600px) {
+    flex-wrap: wrap;
+
+    .col-1of3 {
+      flex: 1 1 calc(50% - var(--app-space-4));
+    }
+  }
+}
+
+.col-half {
+  flex: 1 1 50%;
+  min-width: 0;
+}
+
+.col-1of3 {
+  flex: 1 1 33.33%;
+  min-width: 0;
+}
+
+.col-full {
+  flex: 1 1 100%;
+}
+
+// Branch Location Selection — its own bordered section, visually distinct
+// from the contact-details panel above it (this task's own "Keep the
+// form sections visually clear" instruction).
+.location-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-space-3);
+  border: 1px solid var(--color-navy-200);
+  border-radius: 12px;
+  padding: var(--app-space-4);
+  background: var(--color-navy-50, #f7f9fc);
+}
+
+.location-section-header {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.location-section-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-navy-900);
+}
+
+.location-section-description {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-navy-500);
+}
+
+.location-section-count {
+  margin: 4px 0 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-brand-600, #2f5be5);
+}
+
+.location-empty-hint {
+  display: flex;
+  align-items: center;
+  gap: var(--app-space-2);
+  padding: var(--app-space-4);
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px dashed var(--color-navy-200);
+  color: var(--color-navy-500);
+  font-size: 13px;
+
+  &--error {
+    color: var(--color-error-fg);
+    border-color: var(--color-error-fg);
+  }
+}
+
+.location-table-scroll {
+  max-height: 280px;
+  overflow-y: auto;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.location-table {
+  table-layout: fixed;
+}
+
+.location-th {
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-navy-500);
+  white-space: nowrap;
+}
+
+.location-table tbody tr {
+  border-bottom: 1px solid var(--color-navy-100, #eef1f7);
+
+  &:hover {
+    background: var(--color-navy-50);
+  }
+}
+
+.center-th,
+.center-td {
+  text-align: center;
+}
+
+.form-error {
+  margin: 0;
+  color: var(--color-error-fg);
+  font-size: 13px;
+}
+
+.dialog-footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--app-space-3);
+  padding: var(--app-space-4) var(--app-space-5) var(--app-space-5);
+  border-top: 1px solid var(--color-navy-200);
+}
+
+.required-hint {
+  margin: 0;
+
+  p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--color-navy-400);
+  }
+}
+
+.dialog-footer-actions {
+  display: flex;
+  gap: var(--app-space-2);
+}

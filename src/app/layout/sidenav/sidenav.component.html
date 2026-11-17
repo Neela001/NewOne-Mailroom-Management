@@ -1,0 +1,72 @@
+<div
+  class="relative flex items-center gap-1 border-b border-white/[0.07] px-4 py-4 min-h-16 box-border"
+  [class.flex-col]="compact"
+  [class.gap-2]="compact"
+  [class.py-3]="compact"
+  [class.px-0]="compact"
+>
+  <!-- The real NewOne application icon, extracted from
+       NewOne.Login.WinForms.exe's own PE resources (read-only, D:\NewOne
+       untouched) — not a fabricated replacement. See this session's own
+       design-proposal plan for why "MailRoom" was retired as the on-screen
+       brand name in favor of the product's own real name. -->
+  <a routerLink="/app" class="group flex items-center gap-3 rounded-md p-0.5 -m-0.5 min-w-0" [class.flex-none]="compact" [class.justify-center]="compact" [class.flex-1]="!compact">
+    <span class="relative flex flex-none items-center justify-center w-[38px] h-[38px] rounded-md bg-white overflow-hidden shadow-[0_2px_8px_rgba(15,48,99,0.35)] transition-shadow duration-200 group-hover:shadow-[0_2px_12px_rgba(15,48,99,0.45)]">
+      <img src="assets/branding/newone-logo.png" alt="NewOne" class="h-6 w-6 object-contain" />
+    </span>
+    @if (!compact) {
+      <span class="flex flex-col gap-px leading-tight min-w-0">
+        <span class="text-xl font-bold tracking-tight text-white truncate transition-colors duration-150 group-hover:text-brand-300">NewOne</span>
+        <span class="text-[11px] font-medium text-navy-400 truncate">Operations Console</span>
+      </span>
+    }
+  </a>
+  <button
+    type="button"
+    class="!flex-none flex h-8 w-8 items-center justify-center rounded-md text-navy-400 transition-colors duration-150 hover:bg-white/[0.08] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-400"
+    [title]="compact ? 'Expand sidebar' : 'Collapse sidebar'"
+    [attr.aria-label]="compact ? 'Expand sidebar' : 'Collapse sidebar'"
+    (click)="toggleCompact.emit()"
+  >
+    <app-icon [name]="compact ? 'chevron_right' : 'chevron_left'" [size]="19" />
+  </button>
+</div>
+
+<nav class="flex-1 overflow-y-auto overflow-x-hidden px-3 pt-3 pb-5 [scrollbar-width:thin] [scrollbar-color:rgba(255,255,255,0.07)_transparent]">
+  @if (menuService.isLoading() && !menuService.hasLoaded()) {
+    <div class="flex flex-col items-center gap-3 px-3 py-8 text-center text-navy-300">
+      <span class="h-7 w-7 animate-spin rounded-full border-2 border-white/15 border-t-white"></span>
+      @if (!compact) {
+        <p class="m-0 text-sm">Loading menu…</p>
+      }
+    </div>
+  } @else if (menuService.loadError()) {
+    <div class="flex flex-col items-center gap-3 px-3 py-8 text-center text-navy-300">
+      <app-icon name="error_outline" [size]="24" class="text-navy-500" />
+      @if (!compact) {
+        <p class="m-0 text-sm">{{ menuService.loadError() }}</p>
+        <app-button variant="secondary" size="sm" (click)="retry()">Retry</app-button>
+      }
+    </div>
+  } @else if (menuService.menuTree().length === 0) {
+    <div class="flex flex-col items-center gap-3 px-3 py-8 text-center text-navy-300">
+      <app-icon name="inbox" [size]="24" class="text-navy-500" />
+      @if (!compact) {
+        <p class="m-0 text-sm">No menu items available for this account.</p>
+      }
+    </div>
+  } @else {
+    @for (item of menuService.menuTree(); track item.key) {
+      <app-menu-tree-item [item]="item" [depth]="0" [compact]="compact" (leafClicked)="onLeafClicked()"></app-menu-tree-item>
+    }
+  }
+</nav>
+
+<div class="relative flex items-center gap-3 border-t border-white/[0.07] px-4 py-3">
+  <span class="flex flex-none items-center justify-center w-[30px] h-[30px] rounded-full bg-gradient-to-br from-brand-500 to-brand-700 text-white text-[13px] font-bold shadow-[inset_0_1px_0_rgba(255,255,255,0.3)]">
+    {{ displayName().charAt(0).toUpperCase() }}
+  </span>
+  @if (!compact) {
+    <span class="text-sm font-bold text-navy-50 truncate">{{ displayName() }}</span>
+  }
+</div>

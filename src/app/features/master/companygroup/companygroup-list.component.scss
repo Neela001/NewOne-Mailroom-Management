@@ -1,0 +1,48 @@
+// Shared page-header/toolbar-pill/footer/code-pill/row--selected/toolbar-
+// row-actions chrome lives in styles.scss's own classes — see its own
+// comment for why this isn't duplicated per component.
+
+.companygroup-table {
+  table-layout: fixed;
+}
+
+.table-head-row {
+  border-bottom: 1px solid var(--color-navy-200);
+}
+
+.companygroup-th {
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-navy-500);
+  white-space: nowrap;
+}
+
+.center-th,
+.center-td {
+  text-align: center;
+}
+
+table tbody tr {
+  &:hover {
+    background: var(--color-navy-50);
+  }
+}
+
+// Use --app-status-success-fg, NOT the raw Tailwind v4 @theme token
+// --color-success-fg — see country-list.component.scss's own comment for
+// the full confirmed-live root-cause writeup (Tailwind v4 tree-shakes an
+// @theme token with no utility-class usage anywhere in the codebase).
+.check-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--app-status-success-fg);
+  color: #ffffff;
+}

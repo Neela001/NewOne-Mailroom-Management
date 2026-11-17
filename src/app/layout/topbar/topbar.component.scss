@@ -1,0 +1,274 @@
+// Premium redesign pass — structure/behavior is untouched (same sticky
+// header, same bindings in topbar.component.html, same TopbarComponent
+// methods); only the visual language changes. Previously fully expressed
+// via inline Tailwind utilities (see this file's own prior comment); moved
+// the more stateful/custom pieces (breadcrumb, search, desk chip, avatar)
+// into real classes here so hover/focus transitions and the search's own
+// focus-width micro-interaction don't need a pile of [class.x]="y"
+// bindings on raw utility strings. :host stays `display: contents` — see
+// app-launcher.component.scss's own identical comment for why.
+:host {
+  display: contents;
+}
+
+.tb-root {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 56px;
+  box-sizing: border-box;
+  padding: 0 20px;
+  // NOT backdrop-filter: it would make this header a new CSS containing
+  // block for every `position: fixed` descendant — MenuComponent's own
+  // user-menu panel and AppLauncherComponent's own popup both live inside
+  // this component's DOM tree (<app-menu>/<app-launcher> are children
+  // here), so their fixed positioning would resolve against THIS bar's
+  // own box instead of the real viewport. CONFIRMED live: with blur on,
+  // the user menu's own inline `left` style was computed correctly
+  // (1124px) but rendered at 1388px — exactly this header's own left
+  // offset (past the sidebar) added on top, clipping the panel off the
+  // right edge of the screen. A solid near-white fill + shadow gives the
+  // same "refined" surface without that side effect.
+  background: #fcfdff;
+  border-bottom: 1px solid var(--color-navy-100);
+  box-shadow: var(--app-shadow-sm);
+}
+
+// Breadcrumb — the current page name reads as the actual visual anchor
+// (bold, dark, larger), ancestor segments stay quiet and small; a plain
+// "/" rather than a chevron icon per the task's own "Admin / Menu" example
+// — lighter and more editorial than another icon glyph in an already
+// icon-dense header.
+.tb-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+
+.tb-breadcrumb-item {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-navy-500);
+
+  &--current {
+    max-width: 320px;
+    font-size: 14.5px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--color-navy-900);
+  }
+}
+
+.tb-breadcrumb-sep {
+  font-size: 13px;
+  color: var(--color-navy-300);
+  user-select: none;
+}
+
+// Search — the same rounded-pill language the rest of the app's own list
+// toolbars already use (see master-list.component.html's own
+// .search-pill), not a third, different search-box style. Widens a touch
+// on focus, a smooth transition rather than an abrupt resize.
+.tb-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: none;
+  width: 236px;
+  transition: width 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (max-width: 639.98px) {
+  .tb-search {
+    display: none;
+  }
+}
+
+.tb-search--focused {
+  width: 280px;
+}
+
+.tb-search-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--color-navy-400);
+  pointer-events: none;
+}
+
+.tb-search-input {
+  width: 100%;
+  height: 36px;
+  box-sizing: border-box;
+  border-radius: 999px;
+  border: 1px solid var(--color-navy-200);
+  background: var(--color-navy-50);
+  color: var(--color-navy-900);
+  font-size: 13.5px;
+  padding: 0 12px 0 36px;
+  outline: none;
+  transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
+
+  &::placeholder {
+    color: var(--color-navy-400);
+  }
+
+  &:focus {
+    border-color: var(--color-brand-400);
+    background: #ffffff;
+    box-shadow: 0 0 0 4px var(--color-brand-100);
+  }
+}
+
+.tb-search-results {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 320px;
+  max-height: 60vh;
+  overflow-y: auto;
+  background: #ffffff;
+  border: 1px solid var(--color-navy-200);
+  border-radius: var(--app-radius-lg);
+  box-shadow: var(--app-shadow-md);
+  padding: 8px;
+  z-index: 30;
+}
+
+.tb-search-result {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 10px;
+  text-decoration: none;
+  color: var(--color-navy-900);
+  transition: background-color 150ms ease;
+
+  &:hover {
+    background: var(--color-navy-100);
+  }
+}
+
+// Desk chip — a small tinted icon badge instead of a bare glyph, the swap
+// indicator fades from muted to brand-colored on hover so it reads as
+// "this is actionable" without shouting at rest.
+.tb-desk-chip {
+  display: none;
+  align-items: center;
+  gap: 7px;
+  height: 36px;
+  flex: none;
+  border-radius: 999px;
+  border: 1px solid var(--color-navy-200);
+  background: #ffffff;
+  padding: 0 12px 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-navy-700);
+  cursor: pointer;
+  transition: border-color 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
+
+  @media (min-width: 640px) {
+    display: flex;
+  }
+
+  &:hover {
+    border-color: var(--color-brand-200);
+    background: var(--color-brand-50);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+  }
+}
+
+.tb-desk-chip-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex: none;
+  border-radius: 7px;
+  background: var(--color-brand-50);
+  color: var(--color-brand-600);
+}
+
+.tb-desk-chip:hover .tb-desk-chip-icon {
+  background: #ffffff;
+}
+
+.tb-desk-chip-name {
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tb-desk-chip-swap {
+  flex: none;
+  color: var(--color-navy-300);
+  transition: color 180ms ease, transform 180ms ease;
+}
+
+.tb-desk-chip:hover .tb-desk-chip-swap {
+  color: var(--color-brand-600);
+  transform: rotate(180deg);
+}
+
+// Avatar — a small chevron alongside it (the task's own "optional small
+// dropdown indicator"), both wrapped in one hit target with a shared hover
+// tint rather than two separately-hoverable pieces.
+.tb-avatar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex: none;
+  border: none;
+  background: transparent;
+  padding: 2px 4px 2px 2px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+
+  &:hover {
+    background: var(--color-navy-100);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+  }
+}
+
+.tb-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-brand-500), var(--color-brand-700));
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(47, 91, 229, 0.35);
+}
+
+.tb-avatar-chevron {
+  flex: none;
+  color: var(--color-navy-400);
+}

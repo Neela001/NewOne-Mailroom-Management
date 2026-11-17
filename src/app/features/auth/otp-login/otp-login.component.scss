@@ -1,0 +1,5 @@
+// All visual rules live in the shared auth partial — see
+// ../_auth-shared.scss's own header comment for why this and
+// login.component.scss both @use it instead of each carrying their own
+// near-duplicate copy of the same ~170 lines.
+@use '../auth-shared' as *;

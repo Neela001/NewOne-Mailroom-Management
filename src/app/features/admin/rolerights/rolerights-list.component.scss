@@ -1,0 +1,121 @@
+// Shared page-header/toolbar-pill/footer/code-pill/search-pill chrome lives
+// in styles.scss's own classes — see its own comment for why this isn't
+// duplicated per component. This screen's own matrix table is a different
+// enough shape (fixed-width hierarchy + checkbox columns, no per-row click-
+// to-select, no sorting) that it gets its own small header/cell rules here
+// rather than reusing MasterListComponent's own scoped .sortable-th/
+// .table-head-row/.actions-th (those live in that component's own
+// stylesheet, not global, and imply sortability this screen doesn't have).
+
+.matrix-table {
+  table-layout: fixed;
+}
+
+.matrix-head-row {
+  border-bottom: 1px solid var(--color-navy-200);
+}
+
+.matrix-th {
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-navy-500);
+  white-space: nowrap;
+}
+
+.perm-th {
+  text-align: center;
+}
+
+.matrix-actions-th {
+  text-align: right;
+}
+
+.matrix-actions-td {
+  padding: 8px 12px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+table tbody tr {
+  border-bottom: 1px solid var(--color-navy-100);
+
+  &:hover {
+    background: var(--color-navy-50);
+  }
+
+  &.row--changed {
+    background: var(--color-brand-50);
+  }
+}
+
+.perm-td {
+  padding: 8px 12px;
+  text-align: center;
+
+  app-checkbox {
+    display: inline-flex;
+  }
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+
+  &--assigned {
+    background: var(--color-success-bg);
+    color: var(--color-success-fg);
+  }
+
+  &--unassigned {
+    background: var(--color-navy-100);
+    color: var(--color-navy-400);
+  }
+}
+
+.row-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-left: 4px;
+  border-radius: 50%;
+  border: none;
+  background: var(--color-navy-100);
+  color: var(--color-navy-600);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--color-brand-100);
+    color: var(--color-brand-700);
+  }
+}
+
+.unsaved-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: var(--color-warning-bg);
+  color: var(--color-warning-fg);
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.rolerights-toolbar {
+  flex-wrap: wrap;
+}
+
+.role-select {
+  width: 190px;
+  flex: none;
+}

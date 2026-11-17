@@ -1,0 +1,693 @@
+// ============================================================================
+// "Skyline" — a cool, airy blue-on-white SaaS identity matching an exact
+// reference screenshot the user provided for Country Master: pale-blue
+// page wash, white cards with soft shadow, a vivid azure accent, pill-
+// shaped toolbar/footer controls, bold sans headings (no serif). Replaces
+// the earlier "Ink & Paper" pass (warm paper neutrals + editorial serif,
+// itself a replacement for the first "enterprise SaaS" pass) — this is
+// now the authoritative direction, driven by a concrete visual reference
+// rather than a written brief alone.
+//
+// The direction:
+//   - Cool slate-blue neutrals (pale blue-white page background, dark
+//     navy text) — see tailwind.css's own --color-navy-* scale, which
+//     this file's --mat-sys-* roles mirror.
+//   - A vivid azure accent (--color-brand-600 in tailwind.css), used as
+//     ONE solid primary action per screen plus the table's own selection/
+//     toggle/pill accents — see button.component.ts's own variant rework.
+//   - Bold sans (Inter) for page/dialog titles — no serif anywhere; body
+//     text, table data, and form labels also stay on --font-sans
+//     throughout for consistency and density.
+//   - Generous rounding: large soft-shadowed cards, and full-pill
+//     (rounded-full) toolbar/footer controls matching the reference
+//     exactly — see master-list.component.html's own comment.
+//
+// NO Angular Material dependency — this app has no @angular/material import
+// anywhere (every former Material component — MatDialog, MatSidenav — has
+// been replaced by this app's own custom components; see dialog.service.ts
+// and shell.component.ts's own comments). The --mat-sys-* custom property
+// NAMES below are a historical holdover from when this file generated them
+// via Material's own `mat.theme()` SCSS mixin; they are now plain,
+// hand-declared CSS custom properties with no Material involvement at all —
+// kept as-is (rather than a large, purely cosmetic rename across every
+// consuming stylesheet) since the name no longer implies any dependency.
+// ============================================================================
+
+// Wrapped in Tailwind's own "base" cascade layer (tailwind.css declares
+// `@layer theme, base, components, utilities;` and loads first — see
+// angular.json's own styles order — which establishes utilities as the
+// HIGHEST-priority layer for the whole stylesheet), so Tailwind utility
+// classes always win over anything declared here regardless of selector
+// specificity or source order.
+@layer base {
+html {
+  height: 100%;
+
+  // ---- Typography scale — shorthand `font` value only (weight
+  // size/line-height family); letter-spacing applied separately per use.
+  // Every role uses --font-sans (Inter) — no serif anywhere, matching the
+  // reference's own bold-sans heading treatment. ----
+  --mat-sys-display-small: 700 36px/44px var(--font-sans);
+  --mat-sys-headline-small: 700 26px/34px var(--font-sans);
+  --mat-sys-title-large: 700 24px/30px var(--font-sans);
+  --mat-sys-title-medium: 600 16px/24px var(--font-sans);
+  --mat-sys-label-large: 600 14px/20px var(--font-sans);
+  --mat-sys-label-medium: 600 12px/16px var(--font-sans);
+  --mat-sys-label-small: 600 11px/16px var(--font-sans);
+  --mat-sys-body-medium: 400 14px/20px var(--font-sans);
+  --mat-sys-body-small: 400 12px/16px var(--font-sans);
+
+  // ---- "Skyline" brand palette — same token set _auth-shared.scss
+  // already applies to .login-page, so the whole app (authenticated and
+  // unauthenticated) renders one identical palette. ----
+  --mat-sys-primary: #2f5be5;
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: #dde9ff;
+  --mat-sys-on-primary-container: #182f7d;
+
+  --mat-sys-secondary: #4b5674;
+  --mat-sys-on-secondary: #ffffff;
+  --mat-sys-secondary-container: #e1e7f5;
+  --mat-sys-on-secondary-container: #37415a;
+
+  // No competing second brand hue — tertiary reuses primary azure.
+  --mat-sys-tertiary: #2f5be5;
+  --mat-sys-on-tertiary: #ffffff;
+  --mat-sys-tertiary-container: #dde9ff;
+  --mat-sys-on-tertiary-container: #182f7d;
+
+  --mat-sys-error: #dc2626;
+  --mat-sys-on-error: #ffffff;
+  --mat-sys-error-container: #fdecec;
+  --mat-sys-on-error-container: #7f1d1d;
+
+  --mat-sys-surface: #ffffff;
+  --mat-sys-on-surface: #141a2b;
+  --mat-sys-on-surface-variant: #4b5674;
+  --mat-sys-surface-container-lowest: #ffffff;
+  --mat-sys-surface-container-low: #f6f8fd;
+  --mat-sys-surface-container: #eef2fa;
+  --mat-sys-surface-container-high: #e6ecf8;
+  --mat-sys-surface-container-highest: #e1e7f5;
+  --mat-sys-outline: #99a6c6;
+  --mat-sys-outline-variant: #e1e7f5;
+  --mat-sys-background: #f6f8fd;
+  --mat-sys-on-background: #141a2b;
+
+  --app-space-1: 0.25rem;
+  --app-space-2: 0.5rem;
+  --app-space-3: 0.75rem;
+  --app-space-4: 1rem;
+  --app-space-5: 1.5rem;
+  --app-space-6: 2rem;
+  --app-space-7: 3rem;
+
+  // Generous radii — cards/dialogs rounded, toolbar/footer controls go
+  // further to full pills directly in markup (rounded-full), not a scale
+  // step here (see tailwind.css's own comment).
+  --app-radius-sm: 8px;
+  --app-radius-md: 14px;
+  --app-radius-lg: 20px;
+
+  --app-border: 1px solid var(--mat-sys-outline-variant);
+  --app-shadow-sm: 0 1px 2px rgba(20, 26, 43, 0.05), 0 1px 1px rgba(20, 26, 43, 0.04);
+  --app-shadow-md: 0 8px 24px -4px rgba(20, 26, 43, 0.1), 0 2px 6px rgba(20, 26, 43, 0.05);
+
+  --app-sidenav-width: 264px;
+  --app-sidenav-compact-width: 68px;
+  --app-topbar-height: 56px;
+
+  --app-brand-surface: color-mix(in srgb, var(--mat-sys-primary) 78%, black);
+
+  // Semantic status colors — fixed hex, deliberately NOT derived from the
+  // primary/tertiary brand roles above: a status chip's meaning (success/
+  // error) must stay green/red regardless of what the brand color is, and
+  // the brand color must stay azure regardless of status-chip usage.
+  --app-status-success-bg: #e8f8ee;
+  --app-status-success-fg: #16a34a;
+  --app-status-error-bg: #fdecec;
+  --app-status-error-fg: #dc2626;
+  --app-status-neutral-bg: var(--mat-sys-surface-container-high);
+  --app-status-neutral-fg: var(--mat-sys-on-surface-variant);
+}
+
+body {
+  color-scheme: light;
+  background-color: var(--mat-sys-background);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+  margin: 0;
+  height: 100%;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+// Visible keyboard-focus ring everywhere, consistent with the brand color —
+// Material's own components already manage focus state internally, this
+// covers the plain elements (links, custom buttons) this app adds.
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--mat-sys-primary);
+  outline-offset: 2px;
+}
+
+// ----------------------------------------------------------------------------
+// Shared screen-level patterns — see this file's own header comment.
+// ----------------------------------------------------------------------------
+.app-page-card {
+  padding: var(--app-space-5) var(--app-space-6) var(--app-space-6);
+  border-radius: var(--app-radius-lg);
+  border: none;
+  box-shadow: var(--app-shadow-sm);
+  background: var(--mat-sys-surface);
+}
+
+.app-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: var(--app-space-1);
+  font: var(--mat-sys-label-medium);
+  color: var(--mat-sys-on-surface-variant);
+  margin-bottom: var(--app-space-2);
+}
+
+.app-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--app-space-4);
+  margin-bottom: var(--app-space-5);
+  flex-wrap: wrap;
+}
+
+.app-page-title {
+  margin: 0;
+  font: var(--mat-sys-title-large);
+  letter-spacing: -0.01em;
+  color: var(--mat-sys-on-surface);
+}
+
+.app-page-subtitle {
+  margin: 4px 0 0;
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.app-action-button {
+  display: flex;
+  align-items: center;
+  gap: var(--app-space-2);
+  border-radius: var(--app-radius-sm);
+}
+
+.app-search-field {
+  width: 280px;
+  max-width: 100%;
+  margin-bottom: 0;
+}
+
+// Plain scroll/clip wrapper only — the table's own header/row/cell styling
+// lives directly in each list component's template (see
+// master-list.component.html's own comment for the editorial table
+// treatment: no filled block header, no zebra striping).
+.app-table-scroll {
+  overflow-x: auto;
+  border-radius: var(--app-radius-md);
+
+  table {
+    width: 100%;
+  }
+}
+
+.app-state-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--app-space-3);
+  padding: var(--app-space-6) var(--app-space-4);
+  color: var(--mat-sys-on-surface-variant);
+  text-align: center;
+}
+
+.app-state-row--error {
+  color: var(--mat-sys-error);
+}
+
+// Skeleton loading rows — replaces a centered spinner for table loading
+// states, a calmer, more "the product is working" signal than a blocking
+// spinner for what's usually a sub-second fetch.
+@keyframes app-skeleton-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+.app-skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: var(--app-space-4);
+  padding: var(--app-space-3);
+  border-bottom: var(--app-border);
+}
+
+.app-skeleton-block {
+  height: 12px;
+  border-radius: 4px;
+  background: var(--mat-sys-surface-container-high);
+  animation: app-skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+// Generic status chip — used by UserAudit's own API result column and any
+// entity's own isActive/status display.
+.app-status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px var(--app-space-2);
+  border-radius: 999px;
+  font: var(--mat-sys-label-small);
+  font-weight: 600;
+  white-space: nowrap;
+
+  &::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+}
+
+.app-status-chip--success {
+  background: var(--app-status-success-bg);
+  color: var(--app-status-success-fg);
+}
+
+.app-status-chip--error {
+  background: var(--app-status-error-bg);
+  color: var(--app-status-error-fg);
+}
+
+.app-status-chip--neutral {
+  background: var(--app-status-neutral-bg);
+  color: var(--app-status-neutral-fg);
+}
+
+// Read-only details layout (the View action's own real presentation, not
+// a disabled Add/Edit form) — a label/value description grid, grouped.
+.app-detail-group {
+  margin-bottom: var(--app-space-5);
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.app-detail-group-title {
+  font: var(--mat-sys-label-medium);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  color: var(--mat-sys-on-surface-variant);
+  margin: 0 0 var(--app-space-3);
+  padding-bottom: var(--app-space-2);
+  border-bottom: var(--app-border);
+}
+
+.app-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--app-space-4) var(--app-space-5);
+
+  @media (max-width: 599.98px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.app-detail-item--full {
+  grid-column: 1 / -1;
+}
+
+.app-detail-label {
+  display: block;
+  font: var(--mat-sys-label-small);
+  color: var(--mat-sys-on-surface-variant);
+  margin-bottom: 2px;
+}
+
+.app-detail-value {
+  display: block;
+  font: var(--mat-sys-body-medium);
+  color: var(--mat-sys-on-surface);
+  word-break: break-word;
+}
+
+.app-detail-value--empty {
+  color: var(--mat-sys-outline);
+  font-style: italic;
+}
+
+// ----------------------------------------------------------------------------
+// "Skyline" list-screen chrome — shared by every list screen (generic
+// master/admin entities, Desk, UserAudit) so it's defined once instead of
+// duplicated per component: the icon-badge page header, pill-shaped
+// toolbar, code-pill table cells, and icon+status footer. Screen-specific
+// pieces (sortable column headers, the boolean check-circle/Active
+// toggle-switch cells, the per-row "⋮" actions menu) stay local to
+// master-list.component.scss, since not every list screen uses them yet.
+// ----------------------------------------------------------------------------
+.skyline-card {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(180deg, #eef3ff 0%, #ffffff 38%);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -60px;
+    right: -60px;
+    width: 260px;
+    height: 220px;
+    background: radial-gradient(circle, rgba(47, 91, 229, 0.08) 0%, rgba(47, 91, 229, 0) 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+}
+
+.page-header-row {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--app-space-4);
+  margin-bottom: var(--app-space-5);
+  flex-wrap: wrap;
+}
+
+.page-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--app-space-4);
+}
+
+.page-icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--app-radius-md);
+  background: var(--color-brand-100);
+  color: var(--color-brand-600);
+}
+
+.toolbar-pill-row {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--app-space-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--app-space-5);
+  background: #ffffff;
+  border: 1px solid var(--color-navy-200);
+  border-radius: 999px;
+  padding: 6px 10px 6px 6px;
+  box-shadow: var(--app-shadow-sm);
+
+  @media (max-width: 719.98px) {
+    border-radius: var(--app-radius-md);
+  }
+}
+
+.search-pill {
+  display: flex;
+  align-items: center;
+  flex: 1 1 260px;
+  min-width: 0;
+  gap: 4px;
+}
+
+// An entity's toolbar with extraFilters (currently only Vertical Menu
+// Master) has 9 real controls to fit on one desktop row — CONFIRMED live
+// at 1440px: the fixed-width items alone already exceeded the available
+// row width before Search took any space. Lowering its own flex-basis
+// (min-width: 0 already lets it shrink further still) is what gives the
+// other, narrower-but-fixed controls room to all sit on one line; every
+// other entity (no .toolbar-pill-row--compact) keeps the original 260px.
+.toolbar-pill-row--compact .search-pill {
+  flex-basis: 80px;
+}
+
+.search-pill-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--color-navy-500);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--color-navy-100);
+    color: var(--color-brand-600);
+  }
+}
+
+.search-pill-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 14px;
+  color: var(--color-navy-900);
+
+  &::placeholder {
+    color: var(--color-navy-400);
+  }
+}
+
+.search-pill-kbd {
+  flex: none;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: var(--color-navy-100);
+  color: var(--color-navy-500);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+
+  @media (max-width: 599.98px) {
+    display: none;
+  }
+}
+
+.toolbar-divider {
+  flex: none;
+  width: 1px;
+  align-self: stretch;
+  margin: 4px 0;
+  background: var(--color-navy-200);
+
+  @media (max-width: 719.98px) {
+    display: none;
+  }
+}
+
+// A screen's own Edit/Delete/View History (etc.) action-button group,
+// living inline in the toolbar pill row itself rather than a separate
+// footer row below the table — hoisted here once it was needed by more
+// than just MasterListComponent's own (still-scoped, identical) copy:
+// Desk and User Master both reuse this same class now instead of each
+// carrying their own duplicate rule.
+.toolbar-row-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--app-space-2);
+
+  @media (min-width: 640px) {
+    flex-wrap: nowrap;
+  }
+}
+
+.active-filter-select {
+  width: 150px;
+  flex: none;
+}
+
+// See .toolbar-pill-row--compact .search-pill's own comment above.
+.toolbar-pill-row--compact .active-filter-select {
+  width: 118px;
+}
+
+// An entity's own extra toolbar filter dropdowns (e.g. Vertical Menu
+// Master's own Software/Main Menu — see master-entity-config.model.ts's
+// own MasterExtraFilter comment). Only rendered for entities that declare
+// extraFilters; every other entity's toolbar is unaffected.
+.extra-filter-select {
+  width: 144px;
+  flex: none;
+}
+
+// A selected row — a soft azure tint, no zebra striping.
+.row--selected {
+  background: var(--color-brand-50) !important;
+}
+
+.app-table-scroll table tbody tr {
+  border-bottom: 1px solid var(--color-navy-100);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: var(--color-navy-50);
+  }
+}
+
+// A short identifier column's own value (e.g. a Country/State/City/Desk
+// Code) — a pill-badge chip, not plain text.
+.code-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 11px;
+  border-radius: 999px;
+  background: var(--color-brand-100);
+  color: var(--color-brand-700);
+  font-weight: 600;
+  font-size: 12.5px;
+}
+
+.footer-row {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--app-space-3);
+  margin-top: var(--app-space-5);
+  padding-top: var(--app-space-4);
+  border-top: 1px solid var(--color-navy-200);
+}
+
+.footer-status {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.footer-status-icon {
+  flex: none;
+  margin-top: 1px;
+  color: var(--color-brand-600);
+}
+
+.footer-status-count {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-navy-900);
+}
+
+.footer-status-message {
+  display: block;
+  font-size: 12.5px;
+  color: var(--color-navy-500);
+}
+
+.footer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--app-space-2);
+}
+
+// ----------------------------------------------------------------------------
+// Custom dialog chrome — replaces Angular Material's own default
+// .mat-mdc-dialog-container surface now that every dialog opens through our
+// own DialogService (see dialog.service.ts's own comment), not MatDialog.
+// Applied via DialogService's own `panelClass`/`backdropClass` config to the
+// CDK overlay pane/backdrop elements it creates — CDK Overlay itself (the
+// positioning/scroll-lock/focus-trap mechanics) carries no default visual
+// appearance, only this hand-written CSS does. No hard-bordered form box —
+// a bold title treatment plus generous whitespace and a soft hairline
+// divider above the footer carry the structure instead.
+// ----------------------------------------------------------------------------
+.app-dialog-backdrop {
+  background: rgba(20, 26, 43, 0.45);
+}
+
+.app-dialog-panel {
+  background: var(--mat-sys-surface);
+  border-radius: var(--app-radius-lg);
+  box-shadow: var(--app-shadow-md), 0 24px 64px -16px rgba(20, 26, 43, 0.25);
+  max-height: 90vh;
+  overflow-y: auto;
+  outline: none;
+}
+
+// A large, near-full-height dialog (Email Settings opened from within Add
+// Desk's own Email tab — see desk-form-dialog.component.ts's own
+// openEmailSettings() comment — and Voter Import — see voter-list.
+// component.ts's own openImport() comment) needs its OWN inner region to
+// scroll, not this whole panel — the default .app-dialog-panel above would
+// otherwise scroll the header/toolbar/footer out of view along with the
+// table once content grows. DialogService's own `height` config (see
+// dialog.service.ts) gives this panel a definite height, which these rules
+// turn into a flex column so only .app-table-scroll (the table's own
+// existing scroll region) absorbs the overflow.
+.app-dialog-panel--fill {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  .app-page-card {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .app-table-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+  }
+}
+
+// For the simpler dialogs (confirm/Desk's own) that don't define their own
+// bespoke header/content/footer layout the way the Master Add/Edit and
+// View/History dialogs do — a plain, consistent title/body/actions chrome
+// instead of each one hand-rolling its own padding.
+.app-dialog-title {
+  margin: 0;
+  padding: var(--app-space-5) var(--app-space-5) 0;
+  font: var(--mat-sys-title-large);
+  color: var(--mat-sys-on-surface);
+}
+
+.app-dialog-body {
+  padding: var(--app-space-4) var(--app-space-5);
+}
+
+.app-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--app-space-2);
+  padding: var(--app-space-4) var(--app-space-5) var(--app-space-5);
+  margin-top: var(--app-space-1);
+  border-top: var(--app-border);
+}
+} // @layer base

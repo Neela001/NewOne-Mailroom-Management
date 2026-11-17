@@ -1,0 +1,112 @@
+// Same CDK-overlay-pane-is-flex fix as master-form-dialog.component.scss's
+// own :host rule — see that file's own comment for the measured evidence.
+:host {
+  display: block;
+  width: 100%;
+}
+
+.dialog-header {
+  padding: var(--app-space-5) var(--app-space-5) 0;
+}
+
+.dialog-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--app-space-3);
+}
+
+.dialog-title {
+  margin: 0;
+  font: var(--mat-sys-title-large);
+  color: var(--mat-sys-on-surface);
+}
+
+.dialog-subtitle {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--color-navy-500);
+}
+
+.dialog-content {
+  min-width: 600px;
+  max-width: 88vw;
+  max-height: 65vh;
+  overflow-y: auto;
+  padding: var(--app-space-4) var(--app-space-5);
+
+  @media (max-width: 699.98px) {
+    min-width: 0;
+  }
+}
+
+.form-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-space-4);
+
+  &.two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--app-space-4);
+
+    @media (max-width: 599.98px) {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+.form-field--full-row {
+  grid-column: 1 / -1;
+}
+
+.remove-password-field {
+  align-self: center;
+}
+
+.password-hint {
+  margin: -8px 0 0;
+  font-size: 12.5px;
+  color: var(--color-navy-500);
+}
+
+.auth-summary {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: var(--app-radius-sm);
+  background: var(--color-navy-50);
+  color: var(--color-navy-700);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.options-error {
+  margin: var(--app-space-3) 0 0;
+  font-size: 13px;
+  color: var(--color-error-fg);
+}
+
+.link-button {
+  background: none;
+  border: none;
+  padding: 0;
+  color: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+  font: inherit;
+}
+
+.form-error {
+  margin: var(--app-space-3) 0 0;
+  color: var(--color-error-fg);
+  font-size: 13px;
+}
+
+.dialog-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--app-space-2);
+  padding: var(--app-space-4) var(--app-space-5) var(--app-space-5);
+  border-top: 1px solid var(--color-navy-200);
+}

@@ -1,0 +1,77 @@
+// Shared page-header/toolbar-pill/footer/code-pill/row--selected chrome
+// lives in styles.scss's own classes — see its own comment for why this
+// isn't duplicated per component. This screen's own table header/boolean-
+// indicator/toggle cells mirror MasterListComponent's own scoped styles
+// (that stylesheet is scoped to that component, not global) — no sorting
+// here (not part of this screen's own required workflow), so a simpler,
+// non-interactive header style, not a copy of its clickable sortable-th.
+
+table tbody tr:hover {
+  background: var(--color-navy-50);
+}
+
+.table-head-row {
+  border-bottom: 1px solid var(--color-navy-200);
+}
+
+.sortable-th {
+  padding: 12px 12px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-navy-500);
+  white-space: nowrap;
+}
+
+.center-th,
+.center-td {
+  text-align: center;
+}
+
+.check-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-success-fg);
+  color: #ffffff;
+
+  &--danger {
+    background: var(--color-error-fg);
+  }
+}
+
+.toggle-display {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 34px;
+  height: 19px;
+  border-radius: 999px;
+  background: var(--color-navy-300);
+  transition: background-color 150ms ease;
+
+  &--on {
+    background: var(--color-brand-600);
+  }
+}
+
+.toggle-display-dot {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(20, 26, 43, 0.25);
+  transition: transform 150ms ease;
+
+  .toggle-display--on & {
+    transform: translateX(15px);
+  }
+}

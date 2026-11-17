@@ -1,0 +1,68 @@
+// Shared page-header/toolbar-pill/footer/code-pill/row--selected/toolbar-
+// row-actions chrome lives in styles.scss's own classes — see its own
+// comment for why this isn't duplicated per component.
+
+.country-table {
+  table-layout: fixed;
+}
+
+.table-head-row {
+  border-bottom: 1px solid var(--color-navy-200);
+}
+
+.country-th {
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-navy-500);
+  white-space: nowrap;
+}
+
+.center-th,
+.center-td {
+  text-align: center;
+}
+
+table tbody tr {
+  &:hover {
+    background: var(--color-navy-50);
+  }
+}
+
+// A dependent-field boolean column (State/City/Postal/Area/Active) — a
+// filled green check circle, matching the Windows reference's own
+// checkbox-style display for all five, not a toggle-switch look (which
+// every OTHER entity's own Active column uses instead — this is a genuine,
+// deliberate per-entity difference, not an inconsistency).
+//
+// CONFIRMED LIVE (2026-11-12): --color-success-fg/--color-success-bg (the
+// raw Tailwind v4 @theme tokens master-list.component.scss's own
+// check-circle rule — and emailsetting-list/rolerights-list's own separate
+// uses of --color-success-fg — all reference) resolve to a literal EMPTY
+// string app-wide (getComputedStyle(document.documentElement) on the live
+// running app, not just this screen), because Tailwind v4 only emits a
+// real :root custom property for an @theme token when some Tailwind
+// utility class derived from it (e.g. `bg-success-fg`) is actually present
+// in the scanned source — nothing in this codebase uses one, since every
+// existing "success" treatment goes through the SEPARATE, always-defined
+// --app-status-success-fg/-bg pair in styles.scss instead. Using
+// var(--color-success-fg) silently renders an invisible (transparent
+// background, white-on-transparent icon) circle — reproduced live via a
+// real India row's own true Has State/City/Postal Code/Area values. Using
+// the confirmed-resolving --app-status-success-fg token instead fixes it;
+// this same latent bug likely affects the 3 other existing raw
+// var(--color-success-fg) references elsewhere in this codebase too (not
+// touched here — out of this task's own scope, flagged separately).
+.check-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--app-status-success-fg);
+  color: #ffffff;
+}

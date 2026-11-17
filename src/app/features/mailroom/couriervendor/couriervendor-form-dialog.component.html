@@ -1,0 +1,241 @@
+<div class="dialog-header">
+  <div class="dialog-header-row">
+    <div>
+      <h2 class="dialog-title">{{ isEdit ? 'Edit Courier Vendor' : 'Add Courier Vendor' }}</h2>
+      <p class="dialog-subtitle">Contacts are optional. Click Save to apply vendor and contact changes together.</p>
+    </div>
+    <app-button variant="secondary" icon="close" [iconOnly]="true" type="button" (click)="onCancelClick()">Close</app-button>
+  </div>
+
+  <div class="tab-nav" role="tablist">
+    <button type="button" role="tab" class="tab-nav-button" [class.tab-nav-button--active]="activeTab() === 'details'" (click)="setTab('details')">
+      <app-icon name="truck" [size]="15" />
+      Vendor Details
+    </button>
+    <button type="button" role="tab" class="tab-nav-button" [class.tab-nav-button--active]="activeTab() === 'desks'" (click)="setTab('desks')">
+      <app-icon name="location_on" [size]="15" />
+      Desks
+      @if (assignedDesks().length > 0) {
+        <span class="tab-count-pill">{{ assignedDesks().length }}</span>
+      }
+    </button>
+    <button type="button" role="tab" class="tab-nav-button" [class.tab-nav-button--active]="activeTab() === 'contacts'" (click)="setTab('contacts')">
+      <app-icon name="support_agent" [size]="15" />
+      Contacts
+      @if (contacts().length > 0) {
+        <span class="tab-count-pill">{{ contacts().length }}</span>
+      }
+    </button>
+  </div>
+</div>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()" (keydown.enter)="onEnterKey($event)">
+  <div class="dialog-content">
+    <!-- ========================= TAB 1: VENDOR DETAILS ========================= -->
+    <div class="couriervendor-form-panel" [hidden]="activeTab() !== 'details'">
+      <div class="form-row">
+        <app-combobox
+          class="col-half"
+          label="Courier Mode"
+          [required]="true"
+          [options]="modeOptions()"
+          [loading]="optionsLoading()"
+          [error]="optionsError()"
+          formControlName="courierModeId"
+          placeholder="Select a courier mode…"
+          noResultsText="No active courier modes found."
+          [invalid]="!!(form.get('courierModeId')?.invalid && form.get('courierModeId')?.touched)"
+          errorText="Courier Mode is required"
+        />
+        <app-select
+          class="col-half"
+          label="Vendor Type"
+          [required]="true"
+          [options]="vendorTypeOptions"
+          formControlName="vendorType"
+          placeholder="Select…"
+          [invalid]="!!(form.get('vendorType')?.invalid && form.get('vendorType')?.touched)"
+          errorText="Vendor Type is required"
+        />
+      </div>
+
+      <div class="form-row">
+        <app-input
+          class="col-half"
+          label="Vendor Code"
+          [required]="true"
+          formControlName="vendorCode"
+          [invalid]="!!(form.get('vendorCode')?.invalid && form.get('vendorCode')?.touched)"
+          errorText="Vendor Code is required"
+        />
+        <app-input
+          class="col-half"
+          label="Vendor Name"
+          [required]="true"
+          formControlName="vendorName"
+          [invalid]="!!(form.get('vendorName')?.invalid && form.get('vendorName')?.touched)"
+          errorText="Vendor Name is required"
+        />
+      </div>
+
+      <div class="form-row">
+        <app-input class="col-full" label="Tracking URL" formControlName="trackingUrl" placeholder="https://…" />
+      </div>
+
+      <div class="form-row">
+        <app-select
+          class="col-half"
+          label="Service Type"
+          [required]="true"
+          [options]="serviceTypeOptions"
+          formControlName="serviceType"
+          placeholder="Select…"
+          [invalid]="!!(form.get('serviceType')?.invalid && form.get('serviceType')?.touched)"
+          errorText="Service Type is required"
+        />
+      </div>
+
+      <div class="form-row">
+        <app-textarea class="col-full" label="Change Remarks" formControlName="remarks" />
+      </div>
+    </div>
+
+    <!-- ========================= TAB 2: DESKS ========================= -->
+    <div class="couriervendor-form-panel desks-panel" [hidden]="activeTab() !== 'desks'">
+      <div class="desks-grids">
+        <div class="desk-grid-section">
+          <div class="desk-grid-heading">
+            <h3>Available Desks ({{ availableDeskRows().length }})</h3>
+            <app-button variant="primary" size="sm" icon="add" type="button" [disabled]="!selectedAvailableDeskId()" (click)="addDesk()">Add desk</app-button>
+          </div>
+          @if (optionsLoading()) {
+            <p class="empty-hint">Loading available desks…</p>
+          } @else if (optionsError()) {
+            <p class="empty-hint empty-hint--error">Couldn't load available desks.</p>
+          } @else if (availableDeskRows().length === 0) {
+            <p class="empty-hint">No more desks available to assign.</p>
+          } @else {
+            <div class="grid-table-scroll">
+              <table class="grid-table">
+                <thead>
+                  <tr>
+                    <th>Desk Code</th>
+                    <th>Desk Name</th>
+                    <th>Site</th>
+                    <th>City</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of availableDeskRows(); track row.deskId) {
+                    <tr class="cursor-pointer" [class.row--selected]="isAvailableDeskSelected(row)" (click)="selectAvailableDesk(row)" (dblclick)="addDesk(row)">
+                      <td>{{ row.deskCode || '—' }}</td>
+                      <td>{{ row.deskName || '—' }}</td>
+                      <td>{{ row.siteName || '—' }}</td>
+                      <td>{{ row.cityName || '—' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+
+        <div class="desk-grid-section">
+          <div class="desk-grid-heading">
+            <h3>Assigned Desks ({{ assignedDesks().length }})</h3>
+            <app-button variant="danger" size="sm" icon="delete" type="button" [disabled]="!selectedAssignedDeskId()" (click)="removeDesk()">Remove desk</app-button>
+          </div>
+          @if (assignedDesks().length === 0) {
+            <p class="empty-hint">No desks assigned yet.</p>
+          } @else {
+            <div class="grid-table-scroll">
+              <table class="grid-table">
+                <thead>
+                  <tr>
+                    <th>Desk Code</th>
+                    <th>Desk Name</th>
+                    <th>Site</th>
+                    <th>City</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of assignedDesks(); track row.deskId) {
+                    <tr class="cursor-pointer" [class.row--selected]="isAssignedDeskSelected(row)" (click)="selectAssignedDesk(row)">
+                      <td>{{ row.deskCode || '—' }}</td>
+                      <td>{{ row.deskName || '—' }}</td>
+                      <td>{{ row.siteName || '—' }}</td>
+                      <td>{{ row.cityName || '—' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================= TAB 3: CONTACTS ========================= -->
+    <div class="couriervendor-form-panel contacts-panel" [hidden]="activeTab() !== 'contacts'">
+      @if (assignedDesks().length === 0) {
+        <p class="empty-hint">Assign at least one Desk first — every Contact must belong to one of this vendor's own assigned Desks.</p>
+      } @else {
+        <div class="add-contact-row">
+          <app-select class="col-quarter" label="Desk" [options]="contactDeskOptions()" [ngModel]="newContactDeskId()" (ngModelChange)="newContactDeskId.set($event)" [ngModelOptions]="{ standalone: true }" placeholder="Select a desk…" />
+          <app-input class="col-quarter" label="Contact Person" [ngModel]="newContactPerson()" (ngModelChange)="newContactPerson.set($event)" [ngModelOptions]="{ standalone: true }" />
+          <app-input class="col-quarter" label="Contact No" [ngModel]="newContactNo()" (ngModelChange)="newContactNo.set($event)" [ngModelOptions]="{ standalone: true }" />
+          <app-input class="col-quarter" label="Email" [ngModel]="newContactEmail()" (ngModelChange)="newContactEmail.set($event)" [ngModelOptions]="{ standalone: true }" />
+          <app-button variant="primary" size="sm" icon="add" type="button" [disabled]="!newContactDeskId()" (click)="addContact()">Add contact</app-button>
+        </div>
+      }
+
+      <div class="desk-grid-heading">
+        <h3>Assigned contacts ({{ contacts().length }})</h3>
+        <app-button variant="danger" size="sm" icon="delete" type="button" [disabled]="selectedContactIndex() === null" (click)="removeContact()">Remove contact</app-button>
+      </div>
+      @if (contacts().length === 0) {
+        <p class="empty-hint">No contacts recorded yet.</p>
+      } @else {
+        <div class="grid-table-scroll">
+          <table class="grid-table">
+            <thead>
+              <tr>
+                <th>Desk</th>
+                <th>Contact Person</th>
+                <th>Contact No</th>
+                <th>Email</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of contacts(); track $index) {
+                <tr class="cursor-pointer" [class.row--selected]="selectedContactIndex() === $index" (click)="selectContact($index)">
+                  <td>{{ row.deskCode ? row.deskName + ' (' + row.deskCode + ')' : row.deskName || '—' }}</td>
+                  <td>{{ row.contactPerson || '—' }}</td>
+                  <td>{{ row.contactNo || '—' }}</td>
+                  <td>{{ row.emailId || '—' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+      <p class="empty-hint contacts-helper-text">Selecting a row above and clicking "Remove contact" unassigns it. Changes apply when you click Save Vendor.</p>
+    </div>
+
+    @if (errorMessage()) {
+      <p class="form-error">{{ errorMessage() }}</p>
+    }
+  </div>
+
+  <div class="dialog-footer">
+    <div class="required-hint">
+      <p>* Required fields</p>
+      <p>{{ helperText() }}</p>
+    </div>
+    <div class="dialog-footer-actions">
+      <app-button variant="muted" icon="refresh" type="button" [disabled]="optionsLoading() || saving()" (click)="reloadData()">Reload data</app-button>
+      <app-button variant="secondary" icon="cancel" type="button" (click)="onCancelClick()" [disabled]="saving()">Cancel</app-button>
+      <app-button variant="navy" icon="save" type="submit" [loading]="saving()" [disabled]="saving()">{{ isEdit ? 'Update Vendor' : 'Save Vendor' }}</app-button>
+    </div>
+  </div>
+</form>

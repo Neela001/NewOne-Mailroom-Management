@@ -1,0 +1,123 @@
+<div class="dialog-header">
+  <div class="dialog-header-row">
+    <h2 class="dialog-title">{{ dialogTitle }}</h2>
+    <app-button variant="secondary" icon="close" [iconOnly]="true" type="button" (click)="onCancel()">Close</app-button>
+  </div>
+</div>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()" (keydown.enter)="onEnterKey($event)">
+  <div class="dialog-content">
+    <div class="form-content">
+    <!-- Text/select/date/password fields in a responsive two-column grid —
+         each field fills one cell unless its own config sets fullRow
+         (see master-entity-config.model.ts's own comment), which spans
+         both. Boolean fields are rendered separately below, in their own
+         compact grid, rather than interleaved here: a checkbox and a text
+         field sharing a row reads oddly (different height/baseline), and
+         grouping every yes/no option together scans far better than one
+         full-height row per checkbox. -->
+    @for (field of nonBooleanFields; track field.key) {
+      @switch (field.type) {
+        @case ('select') {
+          @if (field.optionsSource) {
+            <!-- API-backed (large-dataset) field — searchable combobox, not a
+                 plain select, so finding one option among many real rows
+                 (e.g. Postal Code, City, Employee) doesn't mean scrolling a
+                 long list. -->
+            <app-combobox
+              class="full-width"
+              [class.form-field--full-row]="field.fullRow"
+              [label]="field.label + (field.required ? '' : ' (optional)')"
+              [required]="!!field.required"
+              [options]="dynamicOptions()[field.key] ?? []"
+              [loading]="!!loadingOptions()[field.key]"
+              [error]="!!optionsError()[field.key]"
+              [formControlName]="field.key"
+              [invalid]="!!(form.get(field.key)?.invalid && form.get(field.key)?.touched)"
+              [errorText]="field.label + ' is required'"
+            />
+          } @else {
+            <!-- A small, fixed option list (e.g. Gender, User Type) — a
+                 plain select reads faster than a searchable combobox when
+                 there's nothing worth searching. -->
+            <app-select
+              class="full-width"
+              [class.form-field--full-row]="field.fullRow"
+              [label]="field.label"
+              [required]="!!field.required"
+              [options]="field.options ?? []"
+              [formControlName]="field.key"
+              [invalid]="!!(form.get(field.key)?.invalid && form.get(field.key)?.touched)"
+              [errorText]="field.label + ' is required'"
+            />
+          }
+        }
+        @case ('password') {
+          <app-input
+            class="full-width"
+            [class.form-field--full-row]="field.fullRow"
+            [label]="field.label"
+            type="password"
+            autocomplete="new-password"
+            [formControlName]="field.key"
+            [invalid]="!!(form.get(field.key)?.invalid && form.get(field.key)?.touched)"
+            [errorText]="field.label + ' is required'"
+          />
+        }
+        @case ('date') {
+          <app-input
+            class="full-width"
+            [class.form-field--full-row]="field.fullRow"
+            [label]="field.label"
+            type="date"
+            [formControlName]="field.key"
+            [invalid]="!!(form.get(field.key)?.invalid && form.get(field.key)?.touched)"
+            [errorText]="field.label + ' is required'"
+          />
+        }
+        @case ('textarea') {
+          <app-textarea
+            class="full-width"
+            [class.form-field--full-row]="field.fullRow"
+            [label]="field.label"
+            [formControlName]="field.key"
+            [invalid]="!!(form.get(field.key)?.invalid && form.get(field.key)?.touched)"
+            [errorText]="field.label + ' is required'"
+          />
+        }
+        @default {
+          <app-input
+            class="full-width"
+            [class.form-field--full-row]="field.fullRow"
+            [label]="field.label"
+            [required]="!!field.required"
+            [type]="field.type === 'number' ? 'number' : 'text'"
+            [formControlName]="field.key"
+            [invalid]="!!(form.get(field.key)?.invalid && form.get(field.key)?.touched)"
+            [errorText]="field.label + ' is required'"
+          />
+        }
+      }
+    }
+
+      @if (booleanFields.length > 0) {
+        <div class="form-checkbox-grid">
+          @for (field of booleanFields; track field.key) {
+            <app-checkbox [formControlName]="field.key" class="form-checkbox">{{ field.label }}</app-checkbox>
+          }
+        </div>
+      }
+    </div>
+
+    @if (errorMessage()) {
+      <p class="form-error">{{ errorMessage() }}</p>
+    }
+  </div>
+
+  <div class="dialog-footer">
+    <div class="dialog-footer-actions">
+      <app-button variant="secondary" icon="cancel" type="button" (click)="onCancel()" [disabled]="saving()">Close</app-button>
+      <app-button variant="navy" icon="save" type="submit" [loading]="saving()" [disabled]="saving()">Save</app-button>
+    </div>
+  </div>
+</form>

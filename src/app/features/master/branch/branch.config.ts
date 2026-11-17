@@ -1,0 +1,48 @@
+import { MasterEntityConfig } from '../shared/master-entity-config.model';
+
+// Fields from the live spec's BranchRequest/BranchGetRequest.
+export const BRANCH_CONFIG: MasterEntityConfig = {
+  entityLabel: 'Branch',
+  entityLabelPlural: 'Branches',
+  apiBasePath: 'master/branch',
+  idField: 'branchId',
+  columns: [
+    { key: 'companyName', label: 'Company', resolveFrom: { apiBasePath: 'master/company', fromField: 'companyId', toField: 'companyId', labelField: 'companyName' } },
+    { key: 'branchCode', label: 'Code' },
+    { key: 'branchName', label: 'Name' },
+    { key: 'countryName', label: 'Country', resolveFrom: { apiBasePath: 'master/country', fromField: 'countryId', toField: 'countryId', labelField: 'countryName' } },
+    { key: 'stateName', label: 'State', resolveFrom: { apiBasePath: 'master/state', fromField: 'stateId', toField: 'stateId', labelField: 'stateName' } },
+    { key: 'cityName', label: 'City', resolveFrom: { apiBasePath: 'master/city', fromField: 'cityId', toField: 'cityId', labelField: 'cityName' } },
+    { key: 'areaName', label: 'Area', resolveFrom: { apiBasePath: 'master/area', fromField: 'areaId', toField: 'areaId', labelField: 'areaName' } },
+    { key: 'phoneNo', label: 'Phone' },
+  ],
+  formFields: [
+    { key: 'companyId', label: 'Company', type: 'select', required: true, optionsSource: { apiBasePath: 'master/company', valueField: 'companyId', labelField: 'companyName' } },
+    { key: 'branchCode', label: 'Branch Code', type: 'text', required: true },
+    { key: 'branchName', label: 'Branch Name', type: 'text', required: true },
+    { key: 'addressLine1', label: 'Address Line 1', type: 'text' },
+    { key: 'addressLine2', label: 'Address Line 2', type: 'text' },
+    { key: 'addressLine3', label: 'Address Line 3', type: 'text' },
+    { key: 'countryId', label: 'Country', type: 'select', optionsSource: { apiBasePath: 'master/country', valueField: 'countryId', labelField: 'countryName' } },
+    { key: 'stateId', label: 'State', type: 'select', optionsSource: { apiBasePath: 'master/state', valueField: 'stateId', labelField: 'stateName' } },
+    { key: 'cityId', label: 'City', type: 'select', optionsSource: { apiBasePath: 'master/city', valueField: 'cityId', labelField: 'cityName' } },
+    { key: 'postalCodeId', label: 'Postal Code', type: 'select', optionsSource: { apiBasePath: 'master/postalcode', valueField: 'postalCodeId', labelField: 'postalCode' } },
+    { key: 'areaId', label: 'Area', type: 'select', optionsSource: { apiBasePath: 'master/area', valueField: 'areaId', labelField: 'areaName' } },
+    { key: 'phoneNo', label: 'Phone No', type: 'text' },
+    { key: 'alternatePhoneNo', label: 'Alternate Phone No', type: 'text' },
+    { key: 'emailId', label: 'Email', type: 'text' },
+    { key: 'remarks', label: 'Remarks', type: 'textarea', fullRow: true },
+  ],
+  historyColumns: [
+    { key: 'actionDate', label: 'Action Date' },
+    { key: 'actionType', label: 'Action Type' },
+    { key: 'actionBy', label: 'Action By' },
+    { key: 'companyName', label: 'Company', resolveFrom: { apiBasePath: 'master/company', fromField: 'companyId', toField: 'companyId', labelField: 'companyName' } },
+    { key: 'branchCode', label: 'Code' },
+    { key: 'branchName', label: 'Name' },
+    { key: 'isActive', label: 'Active' },
+  ],
+  buildDeleteRequest: (row) => ({ branchId: row['branchId'] }),
+  buildListRequest: (searchText) => ({ searchText: searchText || null, isActive: null }),
+  buildHistoryRequest: (row) => ({ branchId: row['branchId'] }),
+};

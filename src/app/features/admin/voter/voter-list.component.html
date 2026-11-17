@@ -1,0 +1,114 @@
+<div class="app-page-card skyline-card">
+  <div class="page-header-row">
+    <div class="page-header-left">
+      <span class="page-icon-badge"><app-icon [name]="headerIcon()" [size]="26" /></span>
+      <div>
+        <h2 class="app-page-title">Voter Master</h2>
+        <p class="app-page-subtitle">Search voters, maintain details, and import Excel, image or PDF data</p>
+      </div>
+    </div>
+  </div>
+
+  @if (menuService.hasLoaded() && !rights().canView) {
+    <app-empty-state class="access-denied-row" icon="lock" message="You don't have permission to view voters." />
+  } @else {
+    <div class="voter-filter-row">
+      <app-input class="voter-filter--sm" label="Voter ID" placeholder="Exact match" [ngModel]="voterIdDraft()" (ngModelChange)="voterIdDraft.set($event)" (keydown.enter)="search()" [ngModelOptions]="{ standalone: true }" />
+      <app-input class="voter-filter--xs" label="Ward no." [ngModel]="wardNoDraft()" (ngModelChange)="wardNoDraft.set($event)" (keydown.enter)="search()" [ngModelOptions]="{ standalone: true }" />
+      <app-input class="voter-filter--xs" label="Booth no." [ngModel]="boothNoDraft()" (ngModelChange)="boothNoDraft.set($event)" (keydown.enter)="search()" [ngModelOptions]="{ standalone: true }" />
+      <app-input class="voter-filter--lg" label="Name / relative / house" [ngModel]="searchTextDraft()" (ngModelChange)="searchTextDraft.set($event)" (keydown.enter)="search()" [ngModelOptions]="{ standalone: true }" />
+      <app-select class="voter-filter--sm" label="Status" [options]="activeFilterOptions" [ngModel]="statusDraft()" (ngModelChange)="statusDraft.set($event)" [ngModelOptions]="{ standalone: true }" />
+    </div>
+
+    <div class="toolbar-pill-row toolbar-pill-row--compact voter-action-row">
+      <app-button variant="muted" icon="refresh" size="sm" [disabled]="loading()" (click)="refresh()">Refresh</app-button>
+      @if (rights().canAdd) {
+        <app-button variant="primary" icon="add" size="sm" (click)="openAdd()">Add</app-button>
+      }
+      @if (rights().canEdit) {
+        <app-button variant="success" icon="edit" size="sm" [disabled]="!selectedRow()" (click)="openEdit()">Edit</app-button>
+      }
+      @if (rights().canDelete) {
+        <app-button variant="danger" icon="delete" size="sm" [disabled]="!selectedRow()" (click)="deleteRow()">Delete</app-button>
+      }
+      @if (rights().canView) {
+        <app-button variant="info" icon="history" size="sm" [disabled]="!selectedRow()" (click)="openViewHistory()">View / History</app-button>
+      }
+      <app-button variant="primary" icon="search" size="sm" [disabled]="loading()" (click)="search()">Search</app-button>
+      @if (rights().canAdd) {
+        <app-button variant="navy" icon="upload" size="sm" (click)="openImport()">Import voters</app-button>
+      }
+    </div>
+
+    @if (loading()) {
+      <div class="app-table-scroll voter-table-scroll">
+        @for (i of skeletonRows; track i) {
+          <div class="app-skeleton-row">
+            @for (c of [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]; track c) {
+              <div class="app-skeleton-block" style="width: 85px"></div>
+            }
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="app-table-scroll voter-table-scroll">
+        <table class="w-full border-collapse text-sm voter-table">
+          <thead>
+            <tr class="table-head-row">
+              <th class="voter-th" style="width: 60px">S.No.</th>
+              <th class="voter-th" style="width: 65px">Ward</th>
+              <th class="voter-th" style="width: 65px">Booth</th>
+              <th class="voter-th" style="width: 110px">Voter ID</th>
+              <th class="voter-th" style="width: 170px">Name</th>
+              <th class="voter-th" style="width: 90px">Relation</th>
+              <th class="voter-th" style="width: 170px">Relative Name</th>
+              <th class="voter-th" style="width: 90px">House No.</th>
+              <th class="voter-th center-th" style="width: 55px">Age</th>
+              <th class="voter-th" style="width: 80px">Gender</th>
+              <th class="voter-th center-th" style="width: 65px">Active</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of pagedRows(); track row.voterRecordId) {
+              <tr class="cursor-pointer" [class.row--selected]="isSelected(row)" (click)="selectRow(row)">
+                <td class="px-3 py-3 text-navy-800 whitespace-nowrap">{{ row.serialNumber ?? '—' }}</td>
+                <td class="px-3 py-3 text-navy-800 whitespace-nowrap">{{ row.wardNo || '—' }}</td>
+                <td class="px-3 py-3 text-navy-800 whitespace-nowrap">{{ row.boothNo || '—' }}</td>
+                <td class="px-3 py-3 whitespace-nowrap"><span class="code-pill">{{ row.voterId }}</span></td>
+                <td class="px-3 py-3 text-navy-800 whitespace-nowrap"><span class="voter-truncate" [title]="row.name || ''">{{ row.name || '—' }}</span></td>
+                <td class="px-3 py-3 text-navy-800 whitespace-nowrap">{{ row.relationType || '—' }}</td>
+                <td class="px-3 py-3 text-navy-800 whitespace-nowrap"><span class="voter-truncate" [title]="row.relativeName || ''">{{ row.relativeName || '—' }}</span></td>
+                <td class="px-3 py-3 text-navy-800 whitespace-nowrap">{{ row.houseNumber || '—' }}</td>
+                <td class="px-3 py-3 text-navy-800 whitespace-nowrap center-td">{{ row.age ?? '—' }}</td>
+                <td class="px-3 py-3 text-navy-800 whitespace-nowrap">{{ row.gender || '—' }}</td>
+                <td class="px-3 py-3 whitespace-nowrap center-td">
+                  <span class="toggle-display" [class.toggle-display--on]="row.isActive !== false">
+                    <span class="toggle-display-dot"></span>
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+
+        @if (rows().length === 0) {
+          <app-empty-state icon="inbox" message="No voters found." />
+        } @else {
+          <app-pagination [total]="rows().length" [pageSize]="pageSize" [page]="page()" (pageChange)="onPageChange($event)" />
+        }
+      </div>
+    }
+
+    <div class="footer-row">
+      <div class="footer-status">
+        <app-icon name="info_outline" [size]="20" class="footer-status-icon" />
+        <div>
+          <span class="footer-status-count">{{ rows().length }} voters</span>
+          @if (statusMessage()) {
+            <span class="footer-status-message">{{ statusMessage() }}</span>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

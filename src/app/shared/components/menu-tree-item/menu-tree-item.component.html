@@ -1,0 +1,84 @@
+@if (isLeaf) {
+  @if (item.implemented === false) {
+    <span
+      class="menu-row relative flex items-center gap-3 min-h-9 rounded-md text-navy-300 opacity-50 cursor-default pr-3 py-[7px]"
+      [class.!justify-center]="compact"
+      [class.!ml-2]="compact"
+      [class.!px-[7px]]="compact"
+      [style.padding-left.rem]="leafIndentRem"
+      [title]="compact ? item.label + ' — not available yet' : item.label + ' is not available in this release yet.'"
+    >
+      <app-newone-icon [iconKey]="item.newOneIconKey" [size]="18" class="flex-none text-current" />
+      @if (!compact) {
+        <span class="text-[15px] font-semibold truncate">{{ item.label }}</span>
+        <span class="ml-auto flex-none text-[10px] font-bold uppercase tracking-wide text-navy-400 bg-white/[0.08] rounded-full px-1.5 py-px">Soon</span>
+      }
+    </span>
+  } @else {
+    <a
+      class="menu-row relative flex items-center gap-3 min-h-9 rounded-md text-navy-300 no-underline cursor-pointer transition-[background-color,color,transform] duration-[180ms] ease-[cubic-bezier(0.2,0.8,0.2,1)] pr-3 py-[7px] hover:bg-white/[0.08] hover:text-navy-50 hover:translate-x-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand-400"
+      [class.!justify-center]="compact"
+      [class.!ml-2]="compact"
+      [class.!px-[7px]]="compact"
+      [class.!hover:translate-x-0]="compact"
+      [style.padding-left.rem]="leafIndentRem"
+      [routerLink]="item.routerLink"
+      routerLinkActive="menu-row-active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      [title]="compact ? item.label : null"
+      (click)="onLeafClick()"
+    >
+      <app-newone-icon [iconKey]="item.newOneIconKey" [size]="18" class="flex-none text-current" />
+      @if (!compact) {
+        <span class="text-[15px] font-semibold truncate">{{ item.label }}</span>
+      }
+    </a>
+  }
+} @else {
+  <button
+    type="button"
+    class="menu-row box-border flex items-center gap-3 w-full min-h-9 rounded-md text-navy-300 cursor-pointer transition-[background-color,color,transform] duration-[180ms] ease-[cubic-bezier(0.2,0.8,0.2,1)] pr-3 py-[9px] hover:bg-white/[0.08] hover:text-navy-50 hover:translate-x-px focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-brand-400"
+    [class.!font-bold]="isExpanded"
+    [class.!text-navy-50]="isExpanded"
+    [class.!justify-center]="compact"
+    [class.!px-[9px]]="compact"
+    [class.!hover:translate-x-0]="compact"
+    [class.!pt-2.5]="isTopLevel"
+    [class.!pb-2.5]="isTopLevel"
+    [class.!px-3]="isTopLevel"
+    [class.!mt-4]="isTopLevel"
+    [class.first:!mt-0]="isTopLevel"
+    [class.!bg-white/5]="isTopLevel && isExpanded"
+    [style.padding-left.rem]="branchIndentRem"
+    [attr.aria-expanded]="isExpanded"
+    [title]="compact ? item.label : null"
+    (click)="onBranchToggle()"
+  >
+    <app-newone-icon
+      [iconKey]="item.newOneIconKey"
+      [size]="branchIconSize"
+      class="flex-none text-current"
+      [class.!text-navy-400]="isTopLevel && !isExpanded"
+      [class.!text-brand-400]="isTopLevel && isExpanded"
+    />
+    @if (!compact) {
+      <span
+        class="flex-1 text-left text-[15px] font-semibold leading-tight truncate"
+        [class.!text-[12.5px]]="isTopLevel"
+        [class.!font-bold]="isTopLevel"
+        [class.!uppercase]="isTopLevel"
+        [class.!tracking-wide]="isTopLevel"
+        [class.!text-navy-400]="isTopLevel && !isExpanded"
+        [class.!text-brand-400]="isTopLevel && isExpanded"
+      >{{ item.label }}</span>
+      <app-icon name="expand_more" [size]="18" class="flex-none text-navy-500 transition-transform duration-200" [class.rotate-180]="isExpanded" [class.!text-brand-400]="isExpanded" />
+    }
+  </button>
+  <div class="menu-branch-children" [class.menu-branch-children--open]="isExpanded">
+    <div class="overflow-hidden flex flex-col gap-px pt-0.5 pb-0.5">
+      @for (child of item.items; track child.key) {
+        <app-menu-tree-item [item]="child" [depth]="depth + 1" [compact]="compact" (leafClicked)="onChildLeafClicked()"></app-menu-tree-item>
+      }
+    </div>
+  </div>
+}

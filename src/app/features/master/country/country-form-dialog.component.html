@@ -1,0 +1,54 @@
+<div class="dialog-header">
+  <div class="dialog-header-row">
+    <div>
+      <h2 class="dialog-title">{{ isEdit ? 'Edit Country' : 'Add Country' }}</h2>
+      <p class="dialog-subtitle">Fill the required fields, then save the country.</p>
+    </div>
+    <app-button variant="secondary" icon="close" [iconOnly]="true" type="button" (click)="onCancelClick()">Close</app-button>
+  </div>
+</div>
+
+<form [formGroup]="form" (ngSubmit)="onSubmit()" (keydown.enter)="onEnterKey($event)">
+  <div class="dialog-content">
+    <div class="country-form-panel">
+      <div class="form-row">
+        <app-input class="col-narrow" label="Country Code" [required]="true" formControlName="countryCode" [invalid]="!!(form.get('countryCode')?.invalid && form.get('countryCode')?.touched)" errorText="Country Code is required" />
+        <app-input class="col-wide" label="Country Name" [required]="true" formControlName="countryName" [invalid]="!!(form.get('countryName')?.invalid && form.get('countryName')?.touched)" errorText="Country Name is required" />
+      </div>
+
+      <div class="form-row">
+        <app-input class="col-narrow" label="ISD Code" formControlName="isdCode" />
+        <div class="col-wide available-levels-group">
+          <label class="available-levels-label">Available Levels</label>
+          <div class="available-levels-items">
+            <app-checkbox formControlName="hasState">Has State</app-checkbox>
+            <app-checkbox formControlName="hasCity">Has City</app-checkbox>
+            <app-checkbox formControlName="hasPostalCode">Has Postal Code</app-checkbox>
+            <app-checkbox formControlName="hasArea">Has Area</app-checkbox>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <app-input class="col-half" label="State Label" formControlName="stateLabel" />
+        <app-input class="col-half" label="Postal Code Label" formControlName="postalCodeLabel" />
+      </div>
+
+      <div class="form-row">
+        <app-input class="col-full" label="Remarks" formControlName="remarks" />
+      </div>
+    </div>
+
+    @if (errorMessage()) {
+      <p class="form-error">{{ errorMessage() }}</p>
+    }
+  </div>
+
+  <div class="dialog-footer">
+    <p class="required-hint">* Required fields</p>
+    <div class="dialog-footer-actions">
+      <app-button variant="secondary" icon="cancel" type="button" (click)="onCancelClick()" [disabled]="saving()">Cancel</app-button>
+      <app-button variant="navy" icon="save" type="submit" [loading]="saving()" [disabled]="saving()">Save Country</app-button>
+    </div>
+  </div>
+</form>

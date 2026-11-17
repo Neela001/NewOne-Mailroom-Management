@@ -1,0 +1,249 @@
+// Same CDK-overlay-pane-is-flex fix as master-form-dialog.component.scss's
+// own :host rule — see that file's own comment for the measured evidence.
+:host {
+  display: block;
+  width: 100%;
+}
+
+.dialog-header {
+  padding: var(--app-space-5) var(--app-space-5) 0;
+}
+
+.dialog-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--app-space-3);
+}
+
+.dialog-title {
+  margin: 0;
+  font: var(--mat-sys-title-large);
+  color: var(--mat-sys-on-surface);
+}
+
+.dialog-subtitle {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--color-navy-500);
+}
+
+// Three-tab navigation — same pattern as Employee Master's own 3-tab
+// dialog this session. Plain buttons, not a shared Tabs primitive.
+.tab-nav {
+  display: flex;
+  gap: var(--app-space-2);
+  margin-top: var(--app-space-4);
+  border-bottom: 1px solid var(--color-navy-200);
+}
+
+.tab-nav-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-navy-500);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+
+  &:hover {
+    color: var(--color-navy-700);
+  }
+
+  &--active {
+    color: var(--color-brand-600, #2f5be5);
+    border-bottom-color: var(--color-brand-600, #2f5be5);
+  }
+}
+
+.tab-count-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--color-navy-100);
+  color: var(--color-navy-700);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.dialog-content {
+  min-width: 620px;
+  max-width: 94vw;
+  max-height: 68vh;
+  overflow-y: auto;
+  padding: var(--app-space-4) var(--app-space-5);
+
+  @media (max-width: 699.98px) {
+    min-width: 0;
+  }
+}
+
+// A clean bordered panel for the whole form, matching the Windows
+// reference screenshot (same treatment as every other Master's own
+// Add/Edit popups this session).
+.couriervendor-form-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-space-4);
+  border: 1px solid var(--color-navy-200);
+  border-radius: 12px;
+  padding: var(--app-space-4);
+  background: #ffffff;
+}
+
+.form-row {
+  display: flex;
+  gap: var(--app-space-4);
+  align-items: flex-start;
+
+  @media (max-width: 699.98px) {
+    flex-direction: column;
+  }
+}
+
+.col-half {
+  flex: 1 1 50%;
+  min-width: 0;
+}
+
+.col-full {
+  flex: 1 1 100%;
+}
+
+.col-quarter {
+  flex: 1 1 22%;
+  min-width: 0;
+}
+
+// --- Desks tab ---
+.desks-grids {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--app-space-4);
+}
+
+.desk-grid-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--app-space-2);
+}
+
+.desk-grid-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--app-space-3);
+
+  h3 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-navy-700);
+  }
+}
+
+// --- Contacts tab ---
+.add-contact-row {
+  display: flex;
+  gap: var(--app-space-3);
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.contacts-helper-text {
+  font-style: italic;
+}
+
+.grid-table-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--color-navy-200);
+  border-radius: 10px;
+}
+
+.grid-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+
+  th {
+    padding: 8px 10px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--color-navy-500);
+    background: var(--color-navy-50);
+    white-space: nowrap;
+    border-bottom: 1px solid var(--color-navy-200);
+  }
+
+  td {
+    padding: 8px 10px;
+    color: var(--color-navy-800);
+    white-space: nowrap;
+    border-bottom: 1px solid var(--color-navy-100);
+  }
+
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  tbody tr:hover {
+    background: var(--color-navy-50);
+  }
+}
+
+.row--selected {
+  background: var(--color-brand-50, #eef2ff) !important;
+}
+
+.empty-hint {
+  margin: 0;
+  padding: 10px 2px;
+  font-size: 13px;
+  color: var(--color-navy-500);
+
+  &--error {
+    color: var(--color-error-fg);
+  }
+}
+
+.form-error {
+  margin: var(--app-space-4) 0 0;
+  color: var(--color-error-fg);
+  font-size: 13px;
+}
+
+.dialog-footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--app-space-3);
+  padding: var(--app-space-4) var(--app-space-5) var(--app-space-5);
+  border-top: 1px solid var(--color-navy-200);
+}
+
+.required-hint {
+  margin: 0;
+
+  p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--color-navy-400);
+  }
+}
+
+.dialog-footer-actions {
+  display: flex;
+  gap: var(--app-space-2);
+}
